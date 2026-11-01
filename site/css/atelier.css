@@ -1,0 +1,256 @@
+/* ===== ATELIER — the art-direction layer (loaded last) =====
+   Direction: "one motif" in "the dark room".
+   The motif is the stepped gopuram profile of a Kanchipuram temple border. It is the only shape the system uses,
+   at four scales: the hero arch, the image masks, the woven band, the glyph beside buttons and bullets.
+   Everything else is flat: tone steps instead of hairlines, no glass, no glow, no gradient text, no tracked
+   capitals. Type is one grotesk with visible stroke contrast (hand-cut feel) over a quiet text face.
+   Motion has one signature move: images are revealed through warp slats, like threads opening on a loom. */
+
+@font-face{font-family:'Bricolage Grotesque';font-weight:200 800;font-display:swap;src:url(../fonts/bricolage-grotesque-latin-opsz-normal.woff2) format('woff2')}
+@font-face{font-family:'Hanken Grotesk';font-weight:100 900;font-display:swap;src:url(../fonts/hanken-grotesk-latin-wght-normal.woff2) format('woff2')}
+@font-face{font-family:'Hanken Grotesk';font-weight:100 900;font-display:swap;unicode-range:U+20A0-20AB,U+20AD-20C0;src:url(../fonts/hanken-grotesk-latin-ext-wght-normal.woff2) format('woff2')}
+
+:root{
+  --step:polygon(0 100%,0 30%,5% 30%,5% 22%,11% 22%,11% 14%,18% 14%,18% 7%,26% 7%,26% 0,74% 0,74% 7%,82% 7%,82% 14%,89% 14%,89% 22%,95% 22%,95% 30%,100% 30%,100% 100%);   /* the stepped gopuram arch */
+  --madder:#5a1424;
+  --serif:'Bricolage Grotesque','Hanken Grotesk','Segoe UI','Nirmala UI',sans-serif;
+  --sans:'Hanken Grotesk','Segoe UI','Nirmala UI',sans-serif;
+  --ground:#0b0709;                         /* brown-black: a tinted dark, never pure black */
+  --ink:#F2E9DA;--ivory:#F6EEE0;--champ:#DCCFB5;--mute:rgba(242,233,218,.76);
+  --zari:#CBA555;--zari-hi:#EBD08A;--gold:#CBA555;--goldhi:#EBD08A;
+  --line:rgba(242,233,218,.12);--gl:rgba(242,233,218,.2);
+  --glass:#140b0f;--glass2:#1a0f14;
+  --out:cubic-bezier(.23,1,.32,1);
+  /* the motif: a stepped temple-tower profile, 32x16 (glyph) and 40x16 (one tile of the border band) */
+  --zg:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 16'%3E%3Cpath d='M0 16V12h4V8h4V4h4V0h8v4h4v4h4v4h4v4z'/%3E%3C/svg%3E");
+  --zgtile:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 16'%3E%3Cpath d='M4 16V12h4V8h4V4h4V0h8v4h4v4h4v4h4v4z'/%3E%3C/svg%3E");
+}
+html{background:var(--ground)}
+html.no-gl body{background:var(--ground)}
+body{font-feature-settings:"kern","liga";font-optical-sizing:auto}
+::selection{background:var(--zari);color:#1a0f08}
+#stagebg{opacity:.55}                       /* the silk is a room tone, not the subject */
+
+/* ---------- type ---------- */
+h1,h2,h3{font-weight:600;letter-spacing:-.022em;line-height:1.03;color:var(--ivory)}
+.page-head h1,.sec-head h2{background:none;-webkit-background-clip:border-box;background-clip:border-box;color:var(--ivory)}
+.page-head h1{font-size:clamp(38px,5vw,72px)}
+.sec-head h2{font-size:clamp(34px,4.4vw,66px)}
+.eyebrow{font:500 15px/1.4 var(--sans);letter-spacing:0;text-transform:none;color:var(--champ);text-shadow:none}
+.link-arrow{font:600 15px var(--sans);letter-spacing:0;text-transform:none;color:var(--ink);border-bottom:2px solid var(--zari);padding-bottom:4px}
+.link-arrow:hover{color:var(--zari-hi)}
+.split .gl,.gl{background:none;-webkit-background-clip:border-box;background-clip:border-box;color:inherit;font-style:normal}
+.split .gl .ch{background:none;color:inherit}
+.reveal{transform:translateY(18px);transition:opacity .8s var(--out),transform .8s var(--out)}
+
+/* ---------- the motif, drawn ---------- */
+.band{height:16px;background:var(--zari);-webkit-mask:var(--zgtile) 0 0/40px 16px repeat-x;mask:var(--zgtile) 0 0/40px 16px repeat-x}
+.zg{display:inline-block;width:1em;height:.5em;background:var(--zari);-webkit-mask:var(--zg) center/contain no-repeat;mask:var(--zg) center/contain no-repeat}
+
+/* ---------- warp reveal: the signature move ---------- */
+@property --slat{syntax:'<percentage>';inherits:false;initial-value:0%}
+.warp{--slat:0%;-webkit-mask-image:repeating-linear-gradient(90deg,#000 0,#000 var(--slat),transparent var(--slat),transparent 8.3333%);mask-image:repeating-linear-gradient(90deg,#000 0,#000 var(--slat),transparent var(--slat),transparent 8.3333%)}
+.warp.reveal{opacity:1;transform:none;transition:none}
+.arch.warp{animation:warp 1.6s .3s var(--out) both}
+.warp.reveal.in{animation:warp 1.6s var(--out) both}
+.warp.done{-webkit-mask-image:none;mask-image:none;animation:none}
+@keyframes warp{from{--slat:0%}to{--slat:8.34%}}
+
+/* ---------- chrome ---------- */
+#demobar{background:#060405;letter-spacing:0;font:500 13px var(--sans);padding:6px 12px}
+#demobar b{letter-spacing:0;color:var(--zari-hi)}
+#demobar button{border:0;background:#1a1216;color:var(--ink);text-transform:none;letter-spacing:0;font:500 12.5px var(--sans);padding:4px 12px}
+#hdr{background:rgba(11,7,9,.94);backdrop-filter:none;-webkit-backdrop-filter:none;border-bottom:0;color:var(--ink)}
+body[data-route=home] #hdr{background:transparent}
+body[data-route=home] #hdr.solid,#hdr.solid{background:var(--ground);backdrop-filter:none;-webkit-backdrop-filter:none}
+.logo{background:none;-webkit-background-clip:border-box;background-clip:border-box;color:var(--ink);font:700 22px/1 var(--serif);letter-spacing:.015em;margin:0;display:inline-flex;align-items:center;gap:12px;transition:opacity .3s var(--out)}
+.logo::before{content:"";width:28px;height:14px;background:var(--zari);-webkit-mask:var(--zg) center/contain no-repeat;mask:var(--zg) center/contain no-repeat}
+.nav-l,.nav-r{font:500 15px var(--sans);letter-spacing:0;text-transform:none}
+.nav-l a,.nav-r a.tx{border-bottom:2px solid transparent}
+.nav-l a:hover,.nav-l a[aria-current],.nav-r a.tx:hover{border-color:var(--zari)}
+.ib .badge{background:var(--zari);color:#1a0f08}
+@media (min-width:901px){
+  .hdr-in{display:flex;gap:40px}
+  .logo{order:-1}
+  .nav-r{margin-left:auto}
+}
+@media (min-width:901px) and (max-width:1180px){
+  .nav-l a:nth-child(n+4),.nav-r a.tx{display:none}
+  .hdr-in{gap:28px}
+}
+
+/* ---------- buttons: flat, with the motif as the arrow ---------- */
+.btn{border-radius:0;font:600 15px/1 var(--sans);letter-spacing:0;text-transform:none;padding:0 28px}
+.btn::after{display:none}
+.btn-gold,.btn-dark{background:var(--zari);background-image:none;color:#1a0f08;box-shadow:none}
+.btn-gold:hover,.btn-dark:hover{background:var(--zari-hi);background-position:0 0;box-shadow:none}
+.btn-gold::before,.btn-dark::before{content:"";order:2;width:18px;height:9px;background:currentColor;-webkit-mask:var(--zg) center/contain no-repeat;mask:var(--zg) center/contain no-repeat;transition:transform .35s var(--out)}
+.btn-gold:hover::before,.btn-dark:hover::before{transform:translateY(-2px) scale(1.15)}
+.btn-line{background:none;border:2px solid var(--gl);color:var(--ink)}
+.btn-line:hover{background:var(--glass2);border-color:var(--zari)}
+.btn-sm{font-size:14px}
+.chip{background:var(--glass2);border:0;color:var(--ink);border-radius:0}
+.chip.on,.vt button[aria-pressed=true]{background:var(--zari);color:#1a0f08}
+input,select,textarea,.field input,.field select,.field textarea{background:var(--glass2);border:2px solid transparent;border-bottom-color:var(--gl);border-radius:0}
+.field input:focus,.field select:focus,input:focus{border-color:var(--zari);outline:0;box-shadow:none}
+
+/* ---------- surfaces: tone steps, no glass, no hairlines ---------- */
+.card,.panel,.passport,.opt,.vc,.democtl,.news form,.summary,.filters,.news>.wrap{background:var(--glass);border:0;backdrop-filter:none;-webkit-backdrop-filter:none;box-shadow:none}
+.opt[aria-checked=true]{background:var(--glass2);box-shadow:inset 3px 0 0 var(--zari)}
+.drawer,.modal .box,.searchov,.toast{background:#100a0d;backdrop-filter:none;-webkit-backdrop-filter:none;border-color:transparent}
+.scrim{background:rgba(5,3,4,.78);backdrop-filter:none}
+.tbl td{border-top-color:var(--line)}
+#ftr{background:var(--ground);border-top:0;padding:0 0 36px}
+#ftr .band{margin-bottom:56px}
+#ftr h3{font:600 15px var(--sans);letter-spacing:0;text-transform:none;color:var(--zari-hi);margin-bottom:12px}
+#ftr .logo{font-size:30px;margin:0 0 14px;color:var(--ink)}
+#ftr .fine{border-top:0;padding-top:0;margin-top:44px;color:var(--mute)}
+.cur-dot{box-shadow:none}
+.cur-ring{border-color:rgba(242,233,218,.5)}
+
+/* ---------- dock ---------- */
+.dk-pill,.dk-ib{background:var(--glass2);backdrop-filter:none;-webkit-backdrop-filter:none;border:0;color:var(--ink);border-radius:0;box-shadow:none}
+.dk-pill{background:var(--zari);color:#1a0f08;font:600 14px var(--sans);letter-spacing:0;text-transform:none}
+.dk-pill:hover,.dk-ib:hover{background:var(--zari-hi);color:#1a0f08;box-shadow:none}
+.dk-ib[aria-pressed=true]{box-shadow:inset 0 -3px 0 var(--zari)}
+#dkCmd{display:none}
+.dock{transition:opacity .4s var(--out),transform .4s var(--out)}
+body[data-route=home]:not(.past-hero) .dock{opacity:0;pointer-events:none;transform:translateY(14px)}
+#admlink{color:var(--ink);background:#1a1216;padding:4px 12px;font:500 12.5px var(--sans);letter-spacing:0;margin-right:6px}
+
+/* ---------- home: hero ---------- */
+.hero2{position:relative;display:grid;grid-template-columns:minmax(0,5fr) minmax(0,6fr);grid-template-areas:"arch copy" "mono mono";align-items:center;column-gap:clamp(28px,6vw,110px);row-gap:0;min-height:max(100svh,700px);max-width:none;margin:0;padding:calc(var(--hdr) + 22px) var(--pad) 0;overflow:hidden}
+.arch-wrap{grid-area:arch;position:relative;display:flex;justify-content:flex-end;align-self:end;margin-bottom:clamp(8px,2vh,24px)}
+.arch-wrap::before{content:"";position:absolute;right:0;bottom:0;height:min(64svh,640px);max-width:100%;aspect-ratio:4/5;background:var(--madder);clip-path:var(--step);transform:translate(-26px,-26px)}
+.arch{height:min(64svh,640px);width:auto;max-width:100%;aspect-ratio:4/5;border:0;border-radius:0;box-shadow:none;clip-path:var(--step);justify-self:auto}
+.arch::after{background:linear-gradient(0deg,rgba(11,7,9,.5),transparent 30%)}
+.hero-copy{grid-area:copy;align-self:center;padding-bottom:clamp(8px,4vh,48px)}
+.tagline{font:600 clamp(34px,4.5vw,72px)/1.02 var(--serif);letter-spacing:-.028em;color:var(--ivory);max-width:11ch}
+.hero2 .lead{font:400 clamp(18px,1.5vw,21px)/1.6 var(--sans);color:var(--champ);max-width:30em;margin-top:22px}
+.hero2 .cta{display:flex;align-items:center;gap:28px;margin-top:32px;flex-wrap:wrap}
+.assure{list-style:none;display:flex;flex-wrap:wrap;gap:8px 28px;margin-top:34px;font:500 15px var(--sans);color:var(--mute)}
+.assure li{display:flex;align-items:center;gap:10px}
+.assure li::before{content:"";width:16px;height:8px;background:var(--zari);-webkit-mask:var(--zg) center/contain no-repeat;mask:var(--zg) center/contain no-repeat}
+.hero2 h1.mono{grid-area:mono;font:800 19.4vw/.72 var(--serif);letter-spacing:-.04em;text-transform:uppercase;white-space:nowrap;color:var(--ivory);margin:0 calc(var(--pad) * -1);padding:0;text-align:center;perspective:none;overflow:hidden;height:.64em;align-self:end;position:relative}
+.hero2 h1.mono .ch{transform:translateY(105%);transition:transform 1.3s var(--out);transition-delay:calc(var(--i) * 45ms + .35s);opacity:1}
+.hero2 h1.mono.in .ch{transform:none}
+
+/* ---------- home: marquee as a woven border strip ---------- */
+.mq{position:relative;border:0;background:var(--ground);padding:calc(clamp(18px,3vw,38px) + 16px) 0}
+.mq::before,.mq::after{content:"";position:absolute;left:0;right:0;height:16px;background:var(--zari);-webkit-mask:var(--zgtile) 0 0/40px 16px repeat-x;mask:var(--zgtile) 0 0/40px 16px repeat-x}
+.mq::before{top:0}
+.mq::after{bottom:0;transform:scaleY(-1)}
+.mq span{font:700 clamp(44px,6.2vw,100px)/1 var(--serif);letter-spacing:-.025em;color:var(--ivory);-webkit-text-stroke:0}
+.mq span.f{color:var(--zari-hi);font-style:normal}
+.mq i.zg{font-size:clamp(34px,4.4vw,70px)}
+
+/* ---------- home: silk tunnel ---------- */
+.tunnel .tt h2{font:700 clamp(52px,11.5vw,190px)/.9 var(--serif);letter-spacing:-.035em;color:rgba(242,233,218,.13);-webkit-text-stroke:0;background:none;-webkit-background-clip:border-box;background-clip:border-box}
+.tunnel .tcap h3{font-size:clamp(28px,3.4vw,50px)}
+.tunnel .tcap .pr{font:600 20px var(--sans);color:var(--zari-hi)}
+.tunnel .tip{font:500 14px var(--sans);letter-spacing:0;color:var(--mute)}
+.tunnel .tbar i{background:rgba(242,233,218,.25)}
+.tunnel .tbar i.on{background:var(--zari)}
+.tunnel-fb a{border:0}
+
+/* ---------- home: houses of silk ---------- */
+.hs .head h2{font-size:clamp(34px,4.6vw,70px)}
+.slab{--st:36px;border:0;box-shadow:none;background:#150b10;clip-path:polygon(0 var(--st),calc(var(--st)/3) var(--st),calc(var(--st)/3) calc(var(--st)*2/3),calc(var(--st)*2/3) calc(var(--st)*2/3),calc(var(--st)*2/3) calc(var(--st)/3),var(--st) calc(var(--st)/3),var(--st) 0,calc(100% - var(--st)) 0,calc(100% - var(--st)) calc(var(--st)/3),calc(100% - var(--st)*2/3) calc(var(--st)/3),calc(100% - var(--st)*2/3) calc(var(--st)*2/3),calc(100% - var(--st)/3) calc(var(--st)*2/3),calc(100% - var(--st)/3) var(--st),100% var(--st),100% 100%,0 100%)}
+.slab::after{background:linear-gradient(0deg,rgba(11,7,9,.92),transparent 58%)}
+.slab .t b{font:700 clamp(28px,3.2vw,48px)/1.02 var(--serif);letter-spacing:-.025em;margin:0 0 8px}
+.slab .t small{display:block;font:400 16px/1.4 var(--sans);letter-spacing:0;text-transform:none;color:var(--champ)}
+
+/* ---------- home: arrivals, edits, craft, letter ---------- */
+@media (min-width:1000px){#newgrid{grid-template-columns:repeat(3,minmax(0,1fr));gap:44px 28px}}
+.pcard .imgbox{border:0;background:#150b10;box-shadow:none}
+.pcard:hover .imgbox{border:0;box-shadow:none}
+.pcard .imgbox::after{display:none}
+.pcard .tag{background:var(--ground);color:var(--ink);border:0;backdrop-filter:none;font:600 13px var(--sans);letter-spacing:0;text-transform:none;border-radius:0}
+.pcard .heart,.pcard .cmp{background:var(--ground);border:0;color:var(--ink);border-radius:0;backdrop-filter:none}
+.pcard .heart[aria-pressed=true],.pcard .cmp[aria-pressed=true]{background:var(--zari);color:#1a0f08}
+.pcard h3{font-size:clamp(20px,1.7vw,24px);letter-spacing:-.015em}
+.pcard .pr{font-variant-numeric:tabular-nums}
+.edit{--st:24px;border:0;clip-path:polygon(0 var(--st),calc(var(--st)/3) var(--st),calc(var(--st)/3) calc(var(--st)*2/3),calc(var(--st)*2/3) calc(var(--st)*2/3),calc(var(--st)*2/3) calc(var(--st)/3),var(--st) calc(var(--st)/3),var(--st) 0,calc(100% - var(--st)) 0,calc(100% - var(--st)) calc(var(--st)/3),calc(100% - var(--st)*2/3) calc(var(--st)/3),calc(100% - var(--st)*2/3) calc(var(--st)*2/3),calc(100% - var(--st)/3) calc(var(--st)*2/3),calc(100% - var(--st)/3) var(--st),100% var(--st),100% 100%,0 100%)}
+.edit .t b{font:700 clamp(22px,2vw,30px)/1.05 var(--serif);letter-spacing:-.02em}
+.craft2 .frame{border:0;box-shadow:none;clip-path:var(--step)}
+.craft2 h2{font-size:clamp(34px,4.4vw,68px);margin:0 0 22px!important}
+.craft2 .words{font:400 clamp(18px,1.5vw,21px)/1.7 var(--sans)!important}
+.words span{opacity:.62}.words span.on{opacity:1}
+.news>.wrap{padding:clamp(28px,5vw,64px)}
+.news h2{font-size:clamp(30px,3.6vw,52px)}
+.news form input[type=email]{background:var(--glass2);border:2px solid transparent;border-bottom-color:var(--gl)}
+
+/* ---------- shop & product bits that carried the old look ---------- */
+.vt{border:0;background:var(--glass)}
+.vt button{font:600 14px var(--sans);letter-spacing:0;text-transform:none}
+.ring-wrap{border:0;background:var(--glass)}
+.rc a{border:0;box-shadow:none}
+.mainimg{border:0;box-shadow:none;background:#150b10}
+.mainimg::after{display:none}
+.thumb{border-color:transparent}
+.thumb[aria-current=true]{border-color:var(--zari)}
+
+/* ---------- small screens ---------- */
+@media (max-width:900px){
+  .hero2{grid-template-columns:minmax(0,1fr);grid-template-areas:"arch" "copy" "mono";min-height:0;padding-top:calc(var(--hdr) + 8px);row-gap:28px}
+  .arch-wrap{justify-content:center}
+  .arch{height:auto;width:min(86%,420px)}
+  .arch-wrap::before{height:auto;width:min(86%,420px)}
+  .tagline{font-size:clamp(34px,10vw,52px);max-width:12ch}
+  .hero2 h1.mono{font-size:19.4vw;margin-top:8px}
+  .logo{font-size:20px}
+}
+
+@media (prefers-reduced-motion:reduce){
+  .warp{-webkit-mask-image:none;mask-image:none;animation:none!important}
+  .hero2 h1.mono .ch{transform:none;transition:none}
+}
+
+/* ---------- legibility plates & dock labels ---------- */
+.tunnel .tcap{padding:20px 26px 22px;background:rgba(11,7,9,.84)}
+.tunnel .tcap .btn-line{height:44px}
+#dkSound{width:auto;padding:0 16px;gap:10px;font:600 14px var(--sans);letter-spacing:0}
+#dkSound::after{content:"Sound";white-space:nowrap}
+#dkSound[aria-pressed=true]::after{content:"Sound on"}
+
+/* ---------- sweep: no tracked capitals anywhere else (sentence case, readable size) ---------- */
+.field label,
+.hero-foot,
+.cat span,
+.filters h4,
+.specs dt,
+.steps,
+.intro button,
+.card h3,
+.tbl th,
+.kan .col h4,
+.hero-meta,
+.mode button,
+.cmptray .ct,
+.ct-clr,
+.cmp-grid .cl,
+.ck-it .kk,
+.qback,
+.qr .mt,
+.lights button{text-transform:none;letter-spacing:0}
+.filters h4,.specs dt,.lights span,.field label{font-size:14px;color:var(--champ)}
+.ring-hint{font:500 14px var(--sans);letter-spacing:0;text-transform:none;color:var(--mute)}
+.info .eyebrow{font-size:14px!important}
+.story-hero h1 i,.zoomrun h2 i{font-style:normal;color:inherit}
+.pill{text-transform:none;letter-spacing:0;font-weight:600}
+.zoomrun .tile{border:0;box-shadow:none;outline:0;clip-path:var(--step)}
+.zoomrun .tile .pill{top:auto!important;bottom:14px;background:var(--ground);border:0}
+.lights .eyebrow,.lights span{letter-spacing:0!important;font-size:14px!important}
+@media (max-width:600px){
+  #demobar{flex-wrap:wrap;gap:6px 10px;padding:6px 10px}
+  #demobar button,#admlink{white-space:nowrap;padding:3px 8px;font-size:12px}
+}
+
+/* ---------- audit leftovers (tools/tells.js): no glass, no glow, no hairline frames on detail screens ---------- */
+.pdp>.info,.stickybuy,.adm-side{backdrop-filter:none;-webkit-backdrop-filter:none}
+.mode,.pdp>.info,.vc,.mapbox{border:0}
+.mode{background:var(--glass)}
+.mapbox{background:#120a0e}
+.pill.gd{border:0;background:var(--glass2);color:var(--zari-hi)}
+.tl i,.tl .nd i{box-shadow:none!important}
+.verified .vc,.vc{border:0!important;background:var(--glass)}

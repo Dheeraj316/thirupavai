@@ -1,0 +1,16 @@
+**/node_modules
+app/public
+app/test
+app/.env
+app/.env.*
+!app/.env.example
+site/qa
+site/tools
+site/server.js
+site/start.bat
+**/*.log
+.git
+video
+film
+deliverables
+webflow

@@ -1,0 +1,23 @@
+# dependencies and build output
+node_modules/
+app/public/
+
+# secrets: never commit a real .env
+.env
+.env.*
+!.env.example
+
+# film, deck and design work lives next to the app but is not part of it
+video/
+film/
+deliverables/
+webflow/
+
+# test screenshots and logs
+site/qa/
+*.log
+
+# originals and packaging sources kept outside the app repository
+_assets_original/
+package_src/
+site/.claude/
