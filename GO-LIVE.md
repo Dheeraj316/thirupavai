@@ -39,7 +39,7 @@ What "handles 10,000 at once" means here: the web servers keep **no state** (ses
 ## 3. Deploy (once the accounts exist)
 
 1. Put this folder on GitHub (`.gitignore` already leaves out the film, deck and design work).
-2. Render → **New → Blueprint** → pick the repo → it reads `render.yaml` and creates the staging site, its database and its key-value store (Singapore). Enter the mobile number of the first Super Admin when asked.
+2. Render → **New → Blueprint** → pick the repo → it reads `render.yaml` and creates the staging site, its database and its key-value store (Singapore). Enter the mobile number of the first Super Admin when asked. `render.yaml` uses paid plans (Render asks for a card). To try staging at no cost, set **Blueprint Path** to `render.staging-free.yaml` instead: same app and switches on Render's free plans — good for the acceptance list below, not for the load test (the free web server sleeps when idle, the free database expires after 30 days).
 3. Open `https://thirupavai-staging.onrender.com`. Staging shows sign-in codes on screen and uses a fake payment gateway, so nothing real is charged or texted. (The server *refuses* to run test codes or fake payments on any address that does not contain "staging".)
 4. Run the staging acceptance list (section 4). When it passes, create the real shop: **New → Blueprint → Blueprint file path `render.production.yaml`**, fill in the secrets it asks for, add the custom domain, press **Deploy**. Production never deploys by itself.
 5. In Razorpay, add the webhook; in the admin console (`/#/admin`) sign in with the seeded number and add your staff under **Roles & security → Staff access**.
