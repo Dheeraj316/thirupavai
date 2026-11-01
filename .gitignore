@@ -21,3 +21,6 @@ site/qa/
 _assets_original/
 package_src/
 site/.claude/
+
+# raw AI downloads and test crops (the six final views per saree live in site/assets/s)
+site/tools/catalogue/raw/
