@@ -29,6 +29,10 @@ img,video{max-width:100%}
   .stickybuy{padding-bottom:env(safe-area-inset-bottom)}
 }
 
+/* 3a. The floating buttons live in the bottom-right corner on every screen, so they never sit on top of page controls
+   (the product page's light-studio buttons, section headings, card text). */
+.dock{left:auto;right:max(18px,env(safe-area-inset-right))}
+
 /* 3b. The 3D tunnel's hint sits beside the floating buttons instead of under them. */
 @media (max-width:700px){
   .tunnel .tip{left:calc(max(10px,env(safe-area-inset-left)) + 100px);right:12px;bottom:max(14px,env(safe-area-inset-bottom));text-align:left;font-size:13px;line-height:1.35}
@@ -86,6 +90,10 @@ img,video{max-width:100%}
 @media (max-width:900px){
   .filters:not(.on){visibility:hidden;pointer-events:none;transition:transform .4s,visibility 0s linear .4s}
   .filters.on{visibility:visible}
+  /* the sheet is exactly the screen tall and scrolls inside itself (it used to take its content's height, which stopped fitting
+     once there were more fabrics and colours, and "Show results" ended up below the screen); the button stays pinned at the bottom */
+  .filters{align-self:auto;height:100vh;height:100dvh;max-height:100dvh;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding-bottom:max(24px,env(safe-area-inset-bottom))}
+  .filters .fdone{position:sticky;bottom:0;z-index:2;margin-bottom:0;box-shadow:0 -14px 18px -6px rgba(14,4,10,.9)}
 }
 
 /* 7. App-style shopping layout on phones and small tablets (the familiar pattern: a search field that is always there,

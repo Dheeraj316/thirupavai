@@ -1,12 +1,15 @@
 // Sample catalogue — concept data only. Images are the film's concept imagery (generated + supplied references).
 // Each gallery entry: [image, label, focal point "x% y%", zoom (background-size %)]
-export const FABRICS = ['Kanchipuram silk', 'Banarasi silk', 'Mysore silk', 'Organza'];
-export const COLOURS = [['Maroon', '#6b1f35'], ['Red', '#b3262c'], ['Gold', '#c6a15b'], ['Emerald', '#1f6b4f'], ['Royal blue', '#2b3a8c'], ['Pink', '#d86c9a'], ['Ivory', '#efe3d0'], ['Black', '#222222']];
-export const OCCASIONS = ['Bridal', 'Festive', 'Everyday'];
+import { MORE } from './data.more.js';
+import { SET } from './gallery_map.js';
+export const FABRICS = ['Kanchipuram silk', 'Banarasi silk', 'Mysore silk', 'Organza', 'Chanderi cotton', 'Linen', 'Tussar silk', 'Georgette'];
+export const COLOURS = [['Maroon', '#6b1f35'], ['Red', '#b3262c'], ['Gold', '#c6a15b'], ['Emerald', '#1f6b4f'], ['Royal blue', '#2b3a8c'], ['Pink', '#d86c9a'], ['Ivory', '#efe3d0'], ['Black', '#222222'],
+  ['Teal', '#1f6b6b'], ['Mustard', '#c9962b'], ['Sage', '#8fa88b'], ['Lavender', '#9d8bc4'], ['Peach', '#e8a68a'], ['Rust', '#a8481f'], ['Navy', '#1b2a4a'], ['Sky', '#8fb3d9'], ['Mint', '#a8d5c0'], ['Sand', '#d9c7a3'], ['Olive', '#6b7a3a'], ['Charcoal', '#3b3b3f']];
+export const OCCASIONS = ['Bridal', 'Festive', 'Everyday', 'Party', 'Office'];
 export const COLLECTIONS = [['bridal', 'Bridal Edit', 'red', '50% 30%'], ['festive', 'Festive Gold', 'orange', '50% 25%'], ['heritage', 'Silk Heritage', 'blue', '50% 40%'], ['everyday', 'Everyday Elegance', 'green', '50% 50%'], ['contemporary', 'Contemporary Drape', 'seated', '62% 50%']];
 
 const g = (a, b) => ({ img: a, label: b[0], pos: b[1], zoom: b[2] || 'cover' });
-export const PRODUCTS = [
+const BASE = [
   { id: 'p1', sku: 'TPV-BAN-0142', slug: 'maroon-banarasi-katan-silk', name: 'Maroon Banarasi Katan Silk', fabric: 'Banarasi silk', weave: 'Banarasi brocade', colour: 'Maroon', occasion: ['Bridal'], collection: 'bridal', price: 42500, was: null, stock: 1, tag: 'Bridal', date: 20260928,
     desc: 'A deep maroon katan silk with antique-gold zari borders and a woven pallu. Sample product copy — final description will use verified product details.', length: '5.5 m + 0.8 m blouse piece', blouse: 'Unstitched · gold zari', care: 'Dry clean only', returns: 'Eligible · 7 days (sample)',
     gallery: [g('corridor', ['Full view', '67% 50%']), g('brocade', ['Model view', '50% 25%']), g('seated', ['Alternate angle', '60% 50%']), g('border', ['Border close-up', '50% 50%']), g('pallu', ['Pallu close-up', '50% 40%']), g('weave', ['Fabric weave', '50% 50%'])] },
@@ -44,6 +47,12 @@ export const PRODUCTS = [
     desc: 'Blush pink organza with delicate gold embroidery. Sample copy (placeholder styling image).', length: '5.5 m + 0.8 m blouse piece', blouse: 'Unstitched', care: 'Gentle dry clean', returns: 'Eligible · 7 days (sample)',
     gallery: [g('magenta', ['Detail', '30% 30%', '200%']), g('orange', ['Styled', '50% 25%'])] },
 ];
+
+// Every saree with a full set of six photos (assets/s/pNN-1 … pNN-6, see tools/catalogue) shows them, in this order.
+// The 24 newer sarees appear only once their photos exist, so no piece is ever shown with another piece's pictures.
+const VIEWS = [['Full view', '50% 50%'], ['Draped', '50% 40%'], ['Folded', '50% 50%'], ['Border detail', '50% 50%'], ['Pallu detail', '50% 50%'], ['Weave and zari', '50% 50%']];
+const sixViews = (p) => VIEWS.map(([label, pos], i) => g(`s/${p.id}-${i + 1}`, [label, pos]));
+export const PRODUCTS = [...BASE, ...MORE.filter((p) => SET[p.id] >= 6)].map((p) => (SET[p.id] >= 6 ? { ...p, gallery: sixViews(p) } : p));
 
 export const byId = (id) => PRODUCTS.find((p) => p.id === id);
 export const bySlug = (s) => PRODUCTS.find((p) => p.slug === s);

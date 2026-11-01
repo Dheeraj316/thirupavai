@@ -31,7 +31,7 @@ const ok = (name, pass, extra = '') => { results.push({ name, pass, extra }); co
   const hx1 = await page.evaluate(() => document.querySelector('#hstrack').getBoundingClientRect().left); await page.evaluate(() => { const t = document.querySelector('#hs'); scrollTo(0, t.getBoundingClientRect().top + scrollY + (t.offsetHeight - innerHeight) * .7); }); await page.waitForTimeout(1200);
   const hx2 = await page.evaluate(() => document.querySelector('#hstrack').getBoundingClientRect().left); ok('pinned horizontal track slides on scroll', hx2 < hx1 - 60, `${Math.round(hx1)} → ${Math.round(hx2)}`); await shot('02c_home_houses');
   // --- shop filters
-  await nav('#/shop', 'shop'); await page.waitForSelector('#results .pcard'); const total = await page.locator('#results .pcard').count(); ok('shop lists all products', total === 12, 'count=' + total);
+  await nav('#/shop', 'shop'); await page.waitForSelector('#results .pcard'); const total = await page.locator('#results .pcard').count(); const N = await page.evaluate(async () => (await import(new URL('js/data.js', location.href).href)).PRODUCTS.length); ok('shop lists all products', total === N, `count=${total} of ${N}`);
   await page.locator('input[data-k=fabric][value="Banarasi silk"]').check(); await page.waitForTimeout(150);
   const n1 = await page.locator('.pcard').count(); ok('fabric filter narrows results', n1 > 0 && n1 < total, 'banarasi=' + n1);
   await page.locator('button.sw[data-v=Maroon]').click(); await page.locator('button.chip[data-v=Bridal]').click(); await page.waitForTimeout(150);
@@ -44,10 +44,10 @@ const ok = (name, pass, extra = '') => { results.push({ name, pass, extra }); co
   await page.goto(BASE + '#/shop?q=zzzz'); await page.waitForSelector('.empty'); ok('no-results state', (await txt('.empty h3')).includes('No sarees match'));
   // 3D ring view
   await nav('#/shop', 'shop'); await page.waitForSelector('#results .pcard'); await page.click('#vring'); await page.waitForSelector('.rc'); await page.waitForTimeout(700);
-  ok('3D ring lists every saree', (await page.locator('.rc').count()) === 12, 'cards=' + await page.locator('.rc').count());
+  ok('3D ring lists every saree', (await page.locator('.rc').count()) === N, 'cards=' + await page.locator('.rc').count());
   const rt1 = await page.evaluate(() => document.getElementById('rg').style.transform); await page.click('#rnext'); await page.waitForTimeout(1200); const rt2 = await page.evaluate(() => document.getElementById('rg').style.transform);
   ok('ring rotates on Next', rt1 !== rt2); await shot('03b_shop_ring');
-  await page.click('#vgrid'); await page.waitForSelector('.pcard'); ok('grid toggle restores cards', (await page.locator('.pcard').count()) === 12);
+  await page.click('#vgrid'); await page.waitForSelector('.pcard'); ok('grid toggle restores cards', (await page.locator('.pcard').count()) === N);
   await page.evaluate(() => localStorage.setItem('tpv-view', 'grid'));
   // --- product
   await page.goto(BASE + '#/product/maroon-banarasi-katan-silk'); await page.waitForSelector('.mainimg'); await page.waitForTimeout(1200);
