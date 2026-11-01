@@ -5,7 +5,7 @@ const path = require('path');
 const { chromium } = require(path.join(__dirname, '..', '..', 'film', 'node_modules', 'playwright'));
 const CHROME = path.join(process.env.LOCALAPPDATA, 'ms-playwright', 'chromium_headless_shell-1243', 'chrome-headless-shell-win64', 'chrome-headless-shell.exe');
 const BASE = process.argv[2] || 'http://127.0.0.1:8100/';
-const ADMIN = '9000000001';
+const ADMIN = process.env.ADMIN_MOBILE || '9000000001';
 const results = []; const errors = [];
 const ok = (name, pass, extra = '') => { results.push({ name, pass }); console.log((pass ? 'PASS ' : 'FAIL ') + name + (extra ? '  — ' + extra : '')); };
 const run = Date.now() % 100000000;                                  // fresh customer numbers on every run
@@ -114,7 +114,9 @@ const mob = (n) => '98' + String(10000000 + ((run + n) % 80000000));
   ok('admin sees the full customer details (Super Admin)', (await e.locator('.drawer').innerText()).includes('+91 ' + mobA));
   await e.click('#acts button'); await e.waitForFunction((id) => document.querySelector('.drawer')?.innerText.includes('Processing'), orderId, { timeout: 10000 });
   await nav(a, '#/order/' + orderId, 'order'); await a.waitForSelector('.tl .nd.cur');
-  ok('customer’s order page shows the stage the admin set', (await a.locator('.tl .nd.cur b').innerText()).trim() === 'Processing');
+  // the page paints the order it already holds, then re-reads it from the server: over a real network that takes a moment
+  const stageSeen = await a.waitForFunction(() => document.querySelector('.tl .nd.cur b')?.textContent.trim() === 'Processing', null, { timeout: 10000 }).then(() => true, () => false);
+  ok('customer’s order page shows the stage the admin set', stageSeen);
   await e.keyboard.press('Escape');
   await nav(e, '#/admin/products', 'admin'); await e.waitForSelector('tr[data-p="p10"]'); await e.click('tr[data-p="p10"]'); await e.waitForSelector('#ppr'); await e.fill('#ppr', '12345'); await e.click('#psave');
   await e.waitForTimeout(800); await a.waitForTimeout(1700);
@@ -129,7 +131,8 @@ const mob = (n) => '98' + String(10000000 + ((run + n) % 80000000));
   await nav(e, '#/admin/support', 'admin'); await e.waitForSelector('.g-sup');
   ok('support inbox shows the web-form ticket', (await e.locator('main').innerText()).includes('When will my saree ship'));
   await nav(a, '#/admin', 'admin');
-  ok('a customer number gets "No access", not the console', /No access/.test(await a.locator('main').innerText()) && await a.locator('.adm').count() === 0);
+  const denied = await a.waitForFunction(() => /No access/.test(document.querySelector('main')?.innerText || ''), null, { timeout: 10000 }).then(() => true, () => false);   // the console asks the server who they are first
+  ok('a customer number gets "No access", not the console', denied && await a.locator('.adm').count() === 0);
   const forged = await api(a, '/api/admin/products/p10', { method: 'PATCH', body: JSON.stringify({ price: 100 }) });
   ok('and the API refuses their admin calls', forged.status === 403);
 
