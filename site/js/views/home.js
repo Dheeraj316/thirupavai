@@ -2,13 +2,13 @@ import { products, createTicket } from '../store.js';
 import { ONLINE, T } from '../api.js';
 import { COLLECTIONS, FABRICS } from '../data.js';
 import { h, $, $$, ic, img, card, esc, money } from '../ui.js';
-import { glReady } from '../gate.js';
+import { glReady, motionReduced, set3D } from '../gate.js';
 const webglOK = () => { try { const c = document.createElement('canvas'); return !!(c.getContext('webgl2') || c.getContext('webgl')); } catch { return false; } };   // three.js (cloth.js) is imported only when the tunnel mounts
 
 const GAL = [['blue', 'royal-blue-zari-silk'], ['green', 'emerald-peacock-border'], ['border', 'maroon-banarasi-katan-silk'], ['magenta', 'magenta-heritage-silk'], ['pallu', 'wine-katan-gold-border'], ['weave', 'garnet-plain-silk']];
 const FAB = [['Kanchipuram silk', 'orange', '50% 22%', 'Temple borders, woven in Kanchi'], ['Banarasi silk', 'brocade', '50% 25%', 'Brocade, katan and gold zari'], ['Mysore silk', 'green', '50% 50%', 'Crepe silk with a quiet fall'], ['Organza', 'magenta', '30% 30%', 'Featherlight, edged in gold']];
 const WORDS = 'Every saree can carry an authenticity passport: fibre, weave, weaver and Silk Mark / GI details — shown only where they are certified and supplied by the business.';
-const rm = () => matchMedia('(prefers-reduced-motion:reduce)').matches;
+const rm = motionReduced;
 
 export default async function home(root) {
   const all = products(); const bySlug = Object.fromEntries(all.map((p) => [p.slug, p])); const news = all.slice().sort((a, b) => b.date - a.date).slice(0, 6);
@@ -29,8 +29,8 @@ export default async function home(root) {
   <div class="mq" id="mq" aria-hidden="true">${mq(false)}${mq(true)}</div>
 
   ${tunnelOK ? `<section class="tunnel" id="tun" aria-label="Silk gallery — scroll to fly through"><div class="stick"><div class="tt"><h2>Woven in light</h2></div><canvas id="tunc" aria-hidden="true"></canvas>
-      <div class="tcap" id="tcap"></div><div class="tbar" id="tbar" aria-hidden="true">${GAL.map(() => '<i></i>').join('')}</div><div class="tip">Scroll to fly through. Click a cloth to open it.</div></div></section>`
-    : `<section class="sec" aria-label="Silk gallery"><div class="wrap"><div class="sec-head"><div><h2>Woven in Light</h2></div></div></div><div class="tunnel-fb">${GAL.map(([i, s]) => `<a href="#/product/${s}" style="background-image:url(${img(i)})" aria-label="${esc(bySlug[s]?.name || 'Saree')}"></a>`).join('')}</div></section>`}
+      <div class="tcap" id="tcap"></div><div class="tbar" id="tbar" aria-hidden="true">${GAL.map(() => '<i></i>').join('')}</div><div class="tip">Scroll to fly through. ${matchMedia('(hover:none)').matches ? 'Tap' : 'Click'} a cloth to open it.</div></div></section>`
+    : `<section class="sec" aria-label="Silk gallery"><div class="wrap"><div class="sec-head"><div><h2>Woven in Light</h2></div>${webglOK() ? '<button class="btn btn-line btn-sm" id="on3d" type="button" title="Your device asks apps to reduce motion. Tap to play the 3D gallery anyway.">Turn on 3D effects</button>' : ''}</div></div><div class="tunnel-fb">${GAL.map(([i, s]) => `<a href="#/product/${s}" style="background-image:url(${img(i)})" aria-label="${esc(bySlug[s]?.name || 'Saree')}"></a>`).join('')}</div></section>`}
 
   <section class="hs" id="hs" aria-label="The houses of silk"><div class="stick"><div class="head"><h2>The houses of silk</h2></div>
     <div class="track" id="hstrack">${FAB.map(([f, i, p, d], k) => `<a class="slab" href="#/shop?fabric=${encodeURIComponent(f)}"><div class="ph" style="background-image:url(${img(i)});background-position:${p}"></div><div class="t"><b>${f}</b><small>${esc(d)}</small></div></a>`).join('')}<a class="slab" href="#/shop" style="display:grid;place-items:center;text-align:center"><div style="position:relative;z-index:2"><b class="serif" style="font-size:clamp(34px,4vw,60px);color:var(--ivory);display:block;margin:0 0 22px">All sarees</b><span class="btn btn-gold">Enter the shop</span></div></a></div></div></section>
@@ -59,6 +59,7 @@ export default async function home(root) {
 
   // ---- 3D tunnel
   let stop = null, dead = false;
+  $('#on3d', root)?.addEventListener('click', () => { set3D(true); location.reload(); });
   if (tunnelOK) {
     const cap = $('#tcap', root), bars = $$('#tbar i', root); const draw = (i) => { const p = bySlug[GAL[i][1]]; if (!p) return; cap.style.opacity = 0; setTimeout(() => { cap.innerHTML = `<h3>${esc(p.name)}</h3><div class="pr">${money(p.price)}</div><a class="btn btn-line btn-sm" href="#/product/${p.slug}">View saree</a>`; cap.style.transition = 'opacity .5s'; cap.style.opacity = 1; }, 120); bars.forEach((b, k) => b.classList.toggle('on', k === i)); };
     const mountTunnel = () => import('../cloth.js').then(({ silkTunnel }) => silkTunnel($('#tunc', root), GAL.map(([i, s]) => ({ url: img(i), slug: s })), { onPick: (s) => { location.hash = '#/product/' + s; }, onIndex: draw, section: $('#tun', root) })).then((s) => { if (dead) s(); else stop = s; }).catch((e) => { console.warn('tunnel failed', e); $('#tun', root)?.remove(); });

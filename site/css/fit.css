@@ -1,0 +1,136 @@
+/* ===== FIT: one screen-size layer for real devices (loaded last, overrides only what a real phone, tablet or wide screen gets wrong) ===== */
+
+/* 1. Height that matches what the person can actually see.
+   100vh on a phone is the tallest the viewport ever gets (address bar and toolbar tucked away), so full-screen stages ended
+   behind the toolbar and their bottom edge (headlines, buttons) was cut off. 100svh is the visible area. */
+@supports (height:100svh){
+  .tunnel .stick,.hs .stick,.zoomrun .stick,.story-hero{height:100svh}
+  .hs .stick{padding-bottom:7svh}
+  .hero{min-height:100svh}
+  .gal{height:min(100svh,860px)}
+  .adm{min-height:calc(100svh - 110px)}
+  .adm-side{height:100svh}
+  .modal .box{max-height:92svh}
+}
+@media (max-width:900px){
+  @supports (height:100svh){.slab{height:58svh}.zoomrun .tile{height:44svh}.adm-side{height:auto}}
+}
+
+/* 2. Never let one stray element make a page pan sideways. `clip` (unlike `hidden`) keeps sticky sections working. */
+@supports (overflow:clip){body{overflow-x:clip}}
+img,video{max-width:100%}
+
+/* 3. Phones: the floating buttons are small round icons that sit in the corner instead of labelled pills over the content. */
+@media (max-width:700px){
+  .dock{left:max(10px,env(safe-area-inset-left));bottom:max(12px,env(safe-area-inset-bottom));gap:6px}
+  .dk-pill,.dk-ib,#dkSound{height:42px;width:42px;padding:0;justify-content:center;border-radius:50%}
+  #dkSound::after,#dkSound[aria-pressed=true]::after{content:none}
+  body[data-route=product] .dock{bottom:calc(84px + env(safe-area-inset-bottom))}
+  .stickybuy{padding-bottom:env(safe-area-inset-bottom)}
+}
+
+/* 3b. The 3D tunnel's hint sits beside the floating buttons instead of under them. */
+@media (max-width:700px){
+  .tunnel .tip{left:calc(max(10px,env(safe-area-inset-left)) + 100px);right:12px;bottom:max(14px,env(safe-area-inset-bottom));text-align:left;font-size:13px;line-height:1.35}
+  .tunnel-fb{padding-inline:max(var(--pad),env(safe-area-inset-left))}
+}
+
+/* 3c. Sign-in: the six code boxes share the width they are given (any phone, even 320px) and never spill over. */
+.otp{gap:clamp(4px,1.8vw,10px)}
+.otp input{flex:1 1 0;min-width:0;max-width:54px;width:auto;height:clamp(48px,14vw,62px);font-size:clamp(22px,7vw,28px);padding:0}
+.field input,.field select,.field textarea{max-width:100%}
+@media (pointer:coarse){input,select,textarea{font-size:max(16px,1em)}}   /* 16px minimum on touch screens: iPhones zoom the whole page in when a smaller field is focused */
+
+/* 4. Touch screens: tap targets a thumb can hit (44px) where the width allows it. */
+@media (pointer:coarse) and (min-width:400px){.ib{width:44px;height:44px}}
+
+/* 5. A phone turned sideways (short and wide): the hero sits side by side again instead of stacking, and the header shrinks,
+   so the headline and the shop button are on the first screen. */
+@media (max-height:540px) and (orientation:landscape){
+  :root{--hdr:52px}
+  .hdr-in,#hdr{min-height:0}
+}
+@media (max-height:540px) and (orientation:landscape) and (min-width:560px){
+  .hero2{grid-template-columns:minmax(0,5fr) minmax(0,6fr);grid-template-areas:"arch copy" "mono mono";column-gap:clamp(20px,4vw,48px);row-gap:0;padding-top:calc(var(--hdr) + 6px);min-height:0}
+  .arch-wrap{justify-content:flex-end;margin-bottom:0}
+  .arch{height:min(72svh,300px);width:auto}
+  .arch-wrap::before{height:min(72svh,300px);width:auto}
+  .tagline{font-size:clamp(26px,5vw,40px);max-width:13ch}
+  .hero2 .lead{font-size:16px;margin-top:10px}
+  .hero2 .cta{margin-top:14px;gap:18px}
+  .assure{display:none}
+  .hero2 h1.mono{font-size:15vw}
+}
+
+/* 5b. Narrow phones (360px, 320px, small foldables): the header always fits, and the on-screen test-code pill wraps instead of
+   pushing the whole page wider than the screen (it did at 360px: the page then zooms out and pans sideways). */
+.pill{max-width:100%;white-space:normal;overflow-wrap:anywhere}
+@media (max-width:400px){
+  :root{--pad:14px}
+  .ib{width:36px;height:36px}
+  .logo{font-size:17px;letter-spacing:.06em;gap:6px;margin-left:0;min-width:0}
+  .logo::before{width:22px;height:11px}
+  .hdr-in{gap:2px}
+}
+@media (max-width:340px){
+  .ib{width:32px;height:32px}
+  .logo{font-size:15px;letter-spacing:.04em}
+  .logo::before{width:18px;height:9px}
+}
+@media (max-width:300px){.nav-r a[href="#/wishlist"]{display:none}}
+#ftr .cols>*{min-width:0}#ftr a{overflow-wrap:anywhere}
+@media (max-width:340px){#ftr .cols{grid-template-columns:minmax(0,1fr)}}
+
+/* 6b. The filter sheet is as tall as its content, not the screen, so on a tall phone its closed edge peeked into the bottom of
+   the screen and swallowed taps meant for what is underneath. Closed means gone (and out of the keyboard's reach). */
+@media (max-width:900px){
+  .filters:not(.on){visibility:hidden;pointer-events:none;transition:transform .4s,visibility 0s linear .4s}
+  .filters.on{visibility:visible}
+}
+
+/* 7. App-style shopping layout on phones and small tablets (the familiar pattern: a search field that is always there,
+   a swipeable category row, a bottom tab bar, swipeable product rows). Desktop is untouched; the 3D scenes are untouched. */
+.hdr-m,.cat-rail,.tabbar{display:none}
+@media (max-width:900px){
+  /* the header sits in the page flow on every screen (no transparent overlay on the hero) and carries the search field */
+  body[data-route=home] #hdr,#hdr{margin-bottom:0;background:rgba(11,7,9,.97);position:sticky}
+  body[data-route=home] .hero2{padding-top:14px}
+  .hdr-m{display:block;padding-bottom:10px}
+  .msearch{display:flex;align-items:center;gap:10px;width:100%;height:44px;padding:0 14px;background:rgba(248,241,231,.07);border:1px solid var(--gl);border-radius:6px;color:var(--mute);text-align:left}
+  .msearch svg{flex:none;color:var(--zari-hi)}
+  .msearch span{flex:1;min-width:0;font:400 15px var(--sans);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  /* category row: swipe sideways, first chip starts at the page edge */
+  body[data-route=home] .cat-rail,body[data-route=shop] .cat-rail{display:flex;gap:8px;overflow-x:auto;padding:10px var(--pad) 12px;background:var(--ground);scroll-snap-type:x proximity;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+  .cat-rail::-webkit-scrollbar{display:none}
+  .cat-rail a{flex:none;scroll-snap-align:start;padding:9px 16px;border:1px solid var(--gl);border-radius:999px;color:var(--ink);font:500 14px var(--sans);white-space:nowrap}
+  .cat-rail a[aria-current]{background:var(--zari);border-color:var(--zari);color:#1a0f08}
+}
+@media (max-width:700px){
+  /* swipeable product row on the home page ("Just woven") */
+  #newgrid{display:flex;overflow-x:auto;gap:12px;scroll-snap-type:x mandatory;scrollbar-width:none;margin-inline:calc(var(--pad) * -1);padding:0 var(--pad) 6px;scroll-padding-inline:var(--pad)}
+  #newgrid::-webkit-scrollbar{display:none}
+  #newgrid>*{flex:0 0 62%;max-width:260px;scroll-snap-align:start}
+  /* bottom tab bar */
+  .tabbar{display:grid;grid-template-columns:repeat(5,1fr);position:fixed;left:0;right:0;bottom:0;z-index:61;background:rgba(11,7,9,.98);border-top:1px solid var(--gl);padding-bottom:env(safe-area-inset-bottom)}
+  .tabbar a,.tabbar button{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;height:56px;min-width:0;color:var(--mute);font:500 11px var(--sans);letter-spacing:0;background:none;border:0;padding:0}
+  .tabbar a[aria-current=page]{color:var(--zari-hi)}
+  .tabbar a[aria-current=page]::before{content:"";position:absolute;top:0;left:30%;right:30%;height:2px;background:var(--zari)}
+  .tabbar .badge{position:absolute;top:5px;left:calc(50% + 6px);min-width:16px;height:16px;padding:0 4px;border-radius:8px;background:var(--zari);color:#1a0f08;font:700 10px/16px var(--sans);text-align:center}
+  body{padding-bottom:calc(56px + env(safe-area-inset-bottom))}
+  body[data-route=product],body[data-route=checkout],body[data-route=admin]{padding-bottom:0}
+  body[data-route=product] .tabbar,body[data-route=checkout] .tabbar,body[data-route=admin] .tabbar{display:none}
+  /* everything that floats rides above the tab bar; full-screen stages keep their captions clear of it */
+  .dock{left:auto;right:max(10px,env(safe-area-inset-right));bottom:calc(68px + env(safe-area-inset-bottom));flex-direction:column-reverse;opacity:.92}
+  body[data-route=product] .dock{bottom:calc(84px + env(safe-area-inset-bottom))}
+  .toasts{bottom:calc(68px + env(safe-area-inset-bottom))}
+  .cmptray{bottom:calc(124px + env(safe-area-inset-bottom))}
+  .tunnel .tcap{bottom:calc(118px + env(safe-area-inset-bottom))}
+  .tunnel .tip{bottom:calc(66px + env(safe-area-inset-bottom));left:var(--pad);right:64px}
+}
+/* a phone on its side: the screen is too short for a tab bar, a search row or a category row (the search icon stays in the header) */
+@media (max-height:540px) and (orientation:landscape){.tabbar,.hdr-m,.cat-rail{display:none!important}body{padding-bottom:0!important}}
+
+/* 8. Very wide screens: keep line lengths and the hero from stretching without limit. */
+@media (min-width:1800px){
+  .hero2{max-width:1800px;margin-inline:auto}
+}

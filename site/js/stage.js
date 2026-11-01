@@ -1,5 +1,6 @@
 // Persistent WebGL backdrop: flowing silk + a few drifting motes of zari. Reacts to scroll, pointer and route; tints to the saree colour.
 import * as THREE from '../vendor/three/three.module.js';
+import { motionReduced } from './gate.js';
 
 // [dark, lit] colours (linear-ish, tuned by eye)
 const PAL = {
@@ -47,7 +48,8 @@ void main(){
 }`;
 const PFS = `precision mediump float; varying float vA; void main(){ vec2 c = gl_PointCoord-.5; float r = length(c); float a = smoothstep(.5,0.,r); gl_FragColor = vec4(vec3(.98,.82,.52)*1.2, a*a*vA*.9); }`;
 
-const reduce = () => matchMedia('(prefers-reduced-motion:reduce)').matches;
+const reduce = motionReduced;
+const touch = () => matchMedia('(hover:none)').matches;
 export function startStage() {
   const canvas = document.getElementById('stagebg'); if (!canvas) return null;
   let r; try { r = new THREE.WebGLRenderer({ canvas, antialias: false, alpha: false, powerPreference: 'low-power' }); } catch { document.documentElement.classList.add('no-gl'); return null; }
@@ -67,6 +69,7 @@ export function startStage() {
   const frame = (now) => {
     const dt = Math.min(.05, (now - last) / 1000); last = now; acc += dt; U.uT.value += dt;
     const doc = document.documentElement; const max = Math.max(1, doc.scrollHeight - innerHeight); scrollTo = scrollY / max; U.uScroll.value += (scrollTo - U.uScroll.value) * .06;
+    if (touch()) { ptr.x = Math.sin(U.uT.value * .23) * .5; ptr.y = Math.cos(U.uT.value * .17) * .32; }   // a finger gives no hover, so the silk sways on its own and the 3D still reads on a phone
     U.uPtr.value.x += (ptr.x - U.uPtr.value.x) * .04; U.uPtr.value.y += (ptr.y - U.uPtr.value.y) * .04;
     lerp3(U.uC0.value, target[0], .04); lerp3(U.uC1.value, target[1], .04); kick *= .94; U.uKick.value = kick; U.uBeam.value = -.7 + ((U.uT.value * .05 + scrollTo * 1.4) % 1.6);
     r.render(scene, cam);

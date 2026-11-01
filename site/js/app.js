@@ -32,7 +32,7 @@ async function render() {
   const my = ++token; const r = parse(); const key = r.name + ':' + r.args.join(',');
   if (prevKey !== null && prevKey !== key && !covered) { covered = true; await curtain.cover(); if (my !== token) return; }   // silk curtain sweeps in between pages
   closeAll(); try { cleanup?.(); } catch (e) { console.warn(e); } cleanup = null;
-  document.body.dataset.route = r.name; document.title = (TITLES[r.name] || 'Thirupavai') + ' — Thirupavai' + T(' (concept prototype)', '', ' (staging)');
+  document.body.dataset.route = r.name; drawMobileNav(); document.title = (TITLES[r.name] || 'Thirupavai') + ' — Thirupavai' + T(' (concept prototype)', '', ' (staging)');
   main.innerHTML = `<div class="wrap" style="padding:120px 0;text-align:center"><div class="spin" style="margin:0 auto;border-color:rgba(38,13,25,.2);border-top-color:#260D19"></div></div>`;
   try {
     // online: every page opens on today's prices and stock (a conditional request, normally a few ms; never waits more than 0.7 s)
@@ -59,8 +59,26 @@ function drawHeader() {
       <button class="ib" id="sbtn" aria-label="Search">${ic('search', 22)}</button>
       <a class="ib" href="#/account" aria-label="Account">${ic('user', 22)}</a>
       <a class="ib" href="#/wishlist" aria-label="Wishlist, ${wc} saved">${ic('heart', 22)}${wc ? `<span class="badge">${wc}</span>` : ''}</a>
-      <button class="ib" id="bbtn" aria-label="Open bag, ${bag} items">${ic('bag', 22)}${bag ? `<span class="badge">${bag}</span>` : ''}</button></div></div>`;
-  $('#bbtn').onclick = openBag; $('#sbtn').onclick = openSearch; $('#burger').onclick = openMenu;
+      <button class="ib" id="bbtn" aria-label="Open bag, ${bag} items">${ic('bag', 22)}${bag ? `<span class="badge">${bag}</span>` : ''}</button></div></div>
+    <div class="wrap hdr-m"><button class="msearch" id="msearch" type="button" aria-label="Search sarees">${ic('search', 20)}<span>Search sarees, silks, weaves…</span></button></div>`;
+  $('#bbtn').onclick = openBag; $('#sbtn').onclick = openSearch; $('#burger').onclick = openMenu; $('#msearch').onclick = openSearch;
+  drawMobileNav();
+}
+
+// ---------- phone navigation: category row under the search field, tab bar at the bottom (CSS shows them on phones only)
+const RAIL = [['All sarees', '#/shop'], ['New', '#/shop?sort=new'], ['Bridal', '#/shop?occasion=Bridal'], ['Festive', '#/shop?occasion=Festive'], ['Kanchipuram', '#/shop?fabric=Kanchipuram%20silk'], ['Banarasi', '#/shop?fabric=Banarasi%20silk'], ['Mysore', '#/shop?fabric=Mysore%20silk'], ['Organza', '#/shop?fabric=Organza']];
+let tabbar, rail;
+function drawMobileNav() {
+  const r = parse(); const bag = cart.count(), wc = state().wish.length;
+  const is = { home: r.name === 'home', shop: r.name === 'shop', wish: r.path === '/wishlist', acct: r.path === '/account' };
+  const tab = (k, href, icon, label, n) => `<a href="${href}"${is[k] ? ' aria-current="page"' : ''}>${ic(icon, 24)}${n ? `<span class="badge">${n}</span>` : ''}<span>${label}</span></a>`;
+  tabbar = tabbar || document.body.appendChild(h('<nav class="tabbar" id="tabbar" aria-label="Main"></nav>'));
+  tabbar.innerHTML = tab('home', '#/', 'home', 'Home') + tab('shop', '#/shop', 'grid', 'Shop') + tab('wish', '#/wishlist', 'heart', 'Saved', wc)
+    + `<button type="button" id="tbag" aria-label="Open bag, ${bag} items">${ic('bag', 24)}${bag ? `<span class="badge">${bag}</span>` : ''}<span>Bag</span></button>` + tab('acct', '#/account', 'user', 'Account');
+  $('#tbag', tabbar).onclick = openBag;
+  rail = rail || hdr.insertAdjacentElement('afterend', h('<nav class="cat-rail" id="catrail" aria-label="Browse by category"></nav>'));
+  const dec = (s) => { try { return decodeURIComponent(s); } catch { return s; } }; const cur = dec(location.hash || '#/');
+  rail.innerHTML = RAIL.map(([t, l]) => `<a href="${l}"${dec(l) === cur ? ' aria-current="true"' : ''}>${t}</a>`).join('');
 }
 function drawFooter() {
   ftr.innerHTML = `<div class="band" aria-hidden="true"></div><div class="wrap"><div class="cols"><div><div class="logo serif">THIRUPAVAI</div><p style="max-width:300px">Tradition, Woven Into Tomorrow. A premium saree house${T(' — concept prototype with sample data', '')}.</p></div>
@@ -154,5 +172,6 @@ subscribe((what) => {
   drawHeader(); onScroll(); if (['cart', 'orders', 'reset', 'sync'].includes(what)) drawBag(); lastCount = cart.count();
   if (!['cart', 'wish'].includes(what)) window.dispatchEvent(new CustomEvent('tpv:data', { detail: what }));
 });
+addEventListener('hashchange', drawMobileNav);                          // the tab bar answers the tap at once, not after the page transition
 addEventListener('hashchange', render);
 document.addEventListener('click', (e) => { const a = e.target.closest('a[href^="#/"]'); if (a && location.hash === a.getAttribute('href')) { e.preventDefault(); render(); } });

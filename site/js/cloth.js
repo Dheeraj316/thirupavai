@@ -1,5 +1,6 @@
 // Real-time cloth (vertex-displaced planes, three.js). Used for the home "silk gallery" and the product "drape preview".
 import * as THREE from '../vendor/three/three.module.js';
+import { motionReduced } from './gate.js';
 
 const VERT = `
 uniform float uT, uSeed, uAmp, uW, uH;
@@ -33,7 +34,7 @@ const loader = new THREE.TextureLoader();
 const loadTex = (u) => loader.loadAsync(u).then((t) => { t.colorSpace = THREE.NoColorSpace; t.anisotropy = 4; return t; });
 const cover = (tex, pw, ph) => { const ta = tex.image.width / tex.image.height, pa = pw / ph; return ta > pa ? new THREE.Vector2(pa / ta, 1) : new THREE.Vector2(1, ta / pa); };
 const ease = (x) => 1 - Math.pow(1 - Math.min(1, Math.max(0, x)), 3);
-const reduce = () => matchMedia('(prefers-reduced-motion:reduce)').matches;
+const reduce = motionReduced;
 
 function makeRenderer(canvas) {
   const r = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true }); r.setClearColor(0x000000, 0);
