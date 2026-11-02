@@ -4,6 +4,7 @@ const reduce = () => matchMedia('(prefers-reduced-motion:reduce)').matches;
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 
 export function initCursor() {
+  return;   // a second cursor drawn over the real one read as a gimmick; the system cursor is the cursor
   if (!fine() || reduce()) return;
   const dot = document.createElement('div'), ring = document.createElement('div'); dot.className = 'cur-dot'; ring.className = 'cur-ring'; document.body.append(ring, dot);
   let x = -100, y = -100, rx = -100, ry = -100;

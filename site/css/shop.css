@@ -1,1 +1,260 @@
-﻿/* Shop and product page styles (owned by the shop workstream). Loaded after fit.css. */
+﻿/* ===== SHOP + PRODUCT: a calm retail layout (loaded last, scoped to these two routes) =====
+   One display face for headings, one text face for everything else, three text sizes, hairlines instead of boxes, gold only for the
+   main action and the selected state. Every tappable thing is at least 40 px, no text is under 12 px. */
+:is(body[data-route=shop],body[data-route=product]){--hair:rgba(242,233,218,.14);--soft:rgba(242,233,218,.07);--panel:#120a0e;--pg:clamp(16px,3.4vw,56px)}
+
+/* ---------- shared: breadcrumb, buttons, cards ---------- */
+:is(body[data-route=shop],body[data-route=product]) .crumbs{display:flex;flex-wrap:wrap;align-items:center;gap:0 2px;font:400 13.5px/1.2 var(--sans);letter-spacing:0;color:var(--mute)}
+:is(body[data-route=shop],body[data-route=product]) .crumbs a{display:inline-flex;align-items:center;min-height:40px;padding:0 6px;color:var(--mute)}
+:is(body[data-route=shop],body[data-route=product]) .crumbs a:hover{color:var(--ink);text-decoration:underline}
+:is(body[data-route=shop],body[data-route=product]) .crumbs span{padding:0 4px}
+:is(body[data-route=shop],body[data-route=product]) .crumbs [aria-current]{color:var(--ink);padding:0 6px}
+:is(body[data-route=shop],body[data-route=product]) .btn{height:48px;padding:0 24px;font:600 15px var(--sans);letter-spacing:0;text-transform:none;border-radius:0;box-shadow:none;background-image:none}
+:is(body[data-route=shop],body[data-route=product]) .btn-sm{height:44px;padding:0 18px;font-size:14px}
+:is(body[data-route=shop],body[data-route=product]) .btn-gold{background:var(--zari);color:#1a0f08}
+:is(body[data-route=shop],body[data-route=product]) .btn-gold:hover{background:var(--zari-hi);box-shadow:none}
+:is(body[data-route=shop],body[data-route=product]) .btn-line{border:1px solid var(--gl);color:var(--ink);background:transparent}
+:is(body[data-route=shop],body[data-route=product]) .btn-line:hover{border-color:var(--ink);background:var(--soft)}
+:is(body[data-route=shop],body[data-route=product]) .link-arrow{display:inline-flex;align-items:center;min-height:44px;font:500 14.5px var(--sans);color:var(--ink);border-bottom:0;padding:0;text-decoration:underline;text-decoration-color:var(--zari);text-underline-offset:5px;text-decoration-thickness:2px}
+
+/* product cards (shop grid, related, recently viewed) */
+:is(body[data-route=shop],body[data-route=product]) .pgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:28px 12px}
+:is(body[data-route=shop],body[data-route=product]) .pcard .imgbox{aspect-ratio:3/4;background:var(--panel);border:0;box-shadow:none;overflow:hidden}
+:is(body[data-route=shop],body[data-route=product]) .pcard:hover .imgbox{border:0;box-shadow:none}
+:is(body[data-route=shop],body[data-route=product]) .pcard .meta{display:block;padding:12px 2px 0}
+:is(body[data-route=shop],body[data-route=product]) .pcard h3{font:600 clamp(14.5px,1.15vw,16.5px)/1.3 var(--sans);letter-spacing:0;color:var(--ivory)}
+:is(body[data-route=shop],body[data-route=product]) .pcard .sub{font:400 13px/1.4 var(--sans);color:var(--mute);margin-top:3px}
+:is(body[data-route=shop],body[data-route=product]) .pcard .pr{font:600 15px var(--sans);color:var(--ivory);margin-top:8px;text-align:left;white-space:normal;font-variant-numeric:tabular-nums}
+:is(body[data-route=shop],body[data-route=product]) .pcard .pr s{display:inline;margin-left:8px;font:400 13px var(--sans);color:var(--mute)}
+:is(body[data-route=shop],body[data-route=product]) .pcard .tag{left:0;top:0;padding:7px 11px;font:600 12px var(--sans);letter-spacing:.02em;text-transform:none;background:var(--ground);color:var(--ink);border:0;backdrop-filter:none}
+:is(body[data-route=shop],body[data-route=product]) .pcard .heart,:is(body[data-route=shop],body[data-route=product]) .pcard .cmp{width:44px;height:44px;right:0;border-radius:0;background:rgba(11,7,9,.78);color:var(--ink);border:0}
+:is(body[data-route=shop],body[data-route=product]) .pcard .heart{top:0}
+:is(body[data-route=shop],body[data-route=product]) .pcard .cmp{top:44px;opacity:0;transition:opacity .2s}
+:is(body[data-route=shop],body[data-route=product]) .pcard:hover .cmp,:is(body[data-route=shop],body[data-route=product]) .pcard:focus-within .cmp,:is(body[data-route=shop],body[data-route=product]) .pcard .cmp[aria-pressed=true]{opacity:1}
+@media (hover:none){:is(body[data-route=shop],body[data-route=product]) .pcard .cmp{opacity:1}}
+:is(body[data-route=shop],body[data-route=product]) .pcard .heart[aria-pressed=true],:is(body[data-route=shop],body[data-route=product]) .pcard .cmp[aria-pressed=true]{background:var(--zari);color:#1a0f08}
+:is(body[data-route=shop],body[data-route=product]) .pcard .soldout{position:absolute;left:0;right:0;bottom:0;padding:11px;text-align:center;font:600 12.5px var(--sans);letter-spacing:.06em;background:rgba(11,7,9,.86);color:var(--ink)}
+:is(body[data-route=shop],body[data-route=product]) .pcard:has(.soldout) .ph{filter:saturate(.55) brightness(.78)}
+@media (min-width:600px){:is(body[data-route=shop],body[data-route=product]) .pgrid{grid-template-columns:repeat(3,minmax(0,1fr));gap:40px 20px}}
+@media (min-width:1100px){body[data-route=product] .pgrid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media (min-width:1280px){body[data-route=shop] #results.pgrid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media (min-width:1900px){body[data-route=shop] #results.pgrid{grid-template-columns:repeat(5,minmax(0,1fr))}}
+/* on phones the two card buttons are smaller and the compare button sits at the bottom corner, so the photograph stays the subject */
+@media (max-width:640px){
+  :is(body[data-route=shop],body[data-route=product]) .pcard .heart,:is(body[data-route=shop],body[data-route=product]) .pcard .cmp{width:40px;height:40px}
+  :is(body[data-route=shop],body[data-route=product]) .pcard .cmp{top:auto;bottom:0}
+  :is(body[data-route=shop],body[data-route=product]) .pcard:has(.soldout) .cmp{bottom:40px}
+}
+
+/* ---------- SHOP ---------- */
+body[data-route=shop] .wrap.shp{max-width:1680px;padding-inline:var(--pg)}
+.shp-head{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,40ch);gap:10px clamp(24px,5vw,96px);align-items:end;padding:clamp(6px,1.6vw,22px) 0 clamp(16px,2.2vw,30px)}
+.shp-head h1{font:600 clamp(32px,3.6vw,56px)/1.04 var(--serif);letter-spacing:-.025em;margin:4px 0 0;color:var(--ivory);background:none;-webkit-text-fill-color:currentColor}
+.shp-intro{font:400 clamp(14px,1.05vw,16px)/1.6 var(--sans);color:var(--mute);max-width:46ch;margin:0}
+@media (max-width:760px){.shp-head{grid-template-columns:minmax(0,1fr)}.shp-intro{font-size:14.5px}}
+.shp-weaves{display:flex;gap:clamp(18px,2.2vw,34px);overflow-x:auto;scrollbar-width:none;border-bottom:1px solid var(--hair);margin:0 0 clamp(16px,2vw,28px);scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch}
+.shp-weaves::-webkit-scrollbar{display:none}
+.wv{flex:none;scroll-snap-align:start;display:inline-flex;align-items:center;gap:8px;min-height:48px;padding:0 2px;margin-bottom:-1px;font:500 15px var(--sans);letter-spacing:0;color:var(--mute);border-bottom:2px solid transparent;white-space:nowrap;background:none;transition:color .2s}
+.wv span{font-size:12px;color:var(--mute);font-variant-numeric:tabular-nums}
+.wv:hover{color:var(--ink)}
+.wv[aria-pressed=true]{color:var(--ivory);border-bottom-color:var(--zari)}
+body[data-route=shop] .shop{display:grid;grid-template-columns:minmax(220px,264px) minmax(0,1fr);gap:clamp(24px,3.4vw,64px);padding-bottom:clamp(56px,7vw,110px);align-items:start}
+.shp-main{min-width:0}
+
+/* filters */
+body[data-route=shop] .filters{background:none;border:0;padding:0;backdrop-filter:none;-webkit-backdrop-filter:none;box-shadow:none}
+body[data-route=shop] .filters .fhead{display:flex;justify-content:space-between;align-items:center;margin:0 0 6px}
+body[data-route=shop] .filters .fhead h3{font:600 17px var(--sans);letter-spacing:0;color:var(--ivory)}
+body[data-route=shop] .fgroup{border-top:1px solid var(--hair);margin:0}
+body[data-route=shop] .fgroup summary{list-style:none;display:flex;justify-content:space-between;align-items:center;min-height:48px;font:600 14.5px var(--sans);letter-spacing:0;text-transform:none;color:var(--ivory);cursor:pointer}
+body[data-route=shop] .fgroup summary::-webkit-details-marker{display:none}
+body[data-route=shop] .fgroup summary::after{content:"";width:8px;height:8px;border-right:1.6px solid var(--mute);border-bottom:1.6px solid var(--mute);transform:rotate(45deg) translateY(-2px);transition:transform .25s}
+body[data-route=shop] .fgroup[open] summary::after{transform:rotate(-135deg) translateY(-2px)}
+body[data-route=shop] .fgroup .fb{padding:0 0 14px}
+body[data-route=shop] .frow{display:flex;align-items:center;gap:12px;min-height:44px;font:400 15px var(--sans);color:var(--ink);cursor:pointer}
+body[data-route=shop] .frow input{appearance:none;-webkit-appearance:none;width:20px;height:20px;margin:0;border:1.5px solid var(--gl);background:transparent;display:grid;place-content:center;flex:none;border-radius:0}
+body[data-route=shop] .frow input:checked{background:var(--zari);border-color:var(--zari)}
+body[data-route=shop] .frow input:checked::after{content:"";width:10px;height:5px;border-left:2px solid #1a0f08;border-bottom:2px solid #1a0f08;transform:rotate(-45deg) translate(1px,-1px)}
+body[data-route=shop] .frow .n{margin-left:auto;color:var(--mute);font-size:13px;font-variant-numeric:tabular-nums}
+body[data-route=shop] .fl{display:block;font:500 13.5px var(--sans);color:var(--mute);margin:2px 0 6px}
+body[data-route=shop] .swatches{display:grid;grid-template-columns:repeat(auto-fill,minmax(40px,1fr));gap:0}
+body[data-route=shop] .filters .sw{position:relative;width:40px;height:40px;border-radius:0;background:none;box-shadow:none;display:grid;place-items:center}
+body[data-route=shop] .filters .sw i{width:24px;height:24px;border-radius:50%;box-shadow:inset 0 0 0 1px rgba(255,255,255,.3)}
+body[data-route=shop] .filters .sw[aria-pressed=true]::after{inset:3px;border:2px solid var(--zari-hi);border-radius:50%}
+body[data-route=shop] .chips{display:flex;flex-wrap:wrap;gap:8px}
+body[data-route=shop] .chip{min-height:40px;padding:0 14px;font:500 14px var(--sans);letter-spacing:0;text-transform:none;border:1px solid var(--hair);background:transparent;color:var(--ink);border-radius:0;display:inline-flex;align-items:center;gap:6px}
+body[data-route=shop] .chip:hover{border-color:var(--gl);background:var(--soft)}
+body[data-route=shop] .chip.on,body[data-route=shop] .chip[aria-pressed=true]{background:var(--zari);border-color:var(--zari);color:#1a0f08}
+body[data-route=shop] .range{display:flex;gap:8px;align-items:center;margin-top:10px}
+body[data-route=shop] .range input,body[data-route=shop] #fcol{height:44px;width:100%;min-width:0;padding:0 12px;font:400 16px var(--sans);color:var(--ink);background:rgba(255,255,255,.04);border:1px solid var(--hair);border-radius:0}
+body[data-route=shop] .range span{color:var(--mute)}
+body[data-route=shop] #fcol{margin-bottom:6px}
+body[data-route=shop] #fclear{margin:12px 0 6px;min-height:44px}
+body[data-route=shop] select option{background:#140c10;color:#F2E9DA}
+
+/* toolbar */
+.shp-bar{display:flex;align-items:center;gap:12px;padding:0 0 clamp(14px,1.6vw,22px)}
+.shp-count{font:400 14px var(--sans);color:var(--mute);margin-right:auto}
+.shp-bar .fbtn{gap:8px}
+.fcount{min-width:22px;height:22px;padding:0 6px;border-radius:11px;background:var(--zari);color:#1a0f08;font:600 12px/22px var(--sans);text-align:center}
+.shp-bar .vt{display:inline-flex;border:1px solid var(--hair);background:none}
+.shp-bar .vt button{height:44px;padding:0 14px;display:flex;gap:8px;align-items:center;font:500 14px var(--sans);letter-spacing:0;text-transform:none;color:var(--mute);background:none;border-radius:0}
+.shp-bar .vt button[aria-pressed=true]{background:rgba(242,233,218,.13);color:var(--ivory)}
+#sort{height:44px;padding:0 38px 0 14px;font:500 14px var(--sans);color:var(--ink);background:transparent;border:1px solid var(--hair);border-radius:0;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%23DCCFB5' stroke-width='1.6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;max-width:100%}
+.applied{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+.applied:empty{display:none;margin:0}
+.applied .chip.on{padding:0 0 0 14px;background:rgba(242,233,218,.12);border-color:var(--hair);color:var(--ivory)}
+.applied .chip button{width:40px;height:40px;display:grid;place-items:center;color:inherit}
+/* the editorial break inside the grid */
+.shp-assist{grid-column:1/-1;display:flex;gap:clamp(18px,3vw,48px);align-items:center;justify-content:space-between;flex-wrap:wrap;padding:clamp(22px,3vw,40px);background:var(--panel);border-left:3px solid var(--zari)}
+.shp-assist h3{font:600 clamp(18px,1.6vw,24px)/1.25 var(--serif);letter-spacing:-.01em;margin:0 0 6px;max-width:32ch;color:var(--ivory)}
+.shp-assist p{font:400 15px/1.6 var(--sans);color:var(--mute);max-width:58ch;margin:0}
+.shp-assist .acts{display:flex;align-items:center;gap:22px;flex-wrap:wrap}
+/* 3D ring */
+body[data-route=shop] .ring-wrap{background:var(--panel);border:0;height:clamp(500px,72vh,700px)}
+body[data-route=shop] .ring-hint{font:400 13px var(--sans);letter-spacing:0;text-transform:none;color:var(--mute)}
+body[data-route=shop] .rc a{border:0;background:#150b10;box-shadow:0 24px 60px rgba(0,0,0,.5)}
+body[data-route=shop] .rc a::after{background:linear-gradient(0deg,rgba(11,7,9,.9),transparent 46%)}
+body[data-route=shop] .rc .t b{font:600 17px/1.25 var(--sans);letter-spacing:0}
+body[data-route=shop] .rc .t span{font:500 14px var(--sans);color:var(--ink)}
+body[data-route=shop] .ring-ui .btn{width:48px;height:48px;padding:0}
+body[data-route=shop] .empty h3{font:600 clamp(22px,2.4vw,30px) var(--serif)}
+
+/* phones and small tablets: filters become a full-height sheet, the toolbar becomes two tidy rows */
+@media (min-width:901px){
+  body[data-route=shop] .filters{position:sticky;top:calc(var(--hdr) + 18px);max-height:calc(100dvh - var(--hdr) - 36px);overflow:auto;scrollbar-width:thin;padding-right:6px}
+}
+@media (max-width:900px){
+  body[data-route=shop] .shop{grid-template-columns:minmax(0,1fr)}
+  body[data-route=shop] .filters{background:#0f090c;padding:0 var(--pg) max(24px,env(safe-area-inset-bottom))}
+  body[data-route=shop] .filters .fhead{position:sticky;top:0;z-index:3;background:#0f090c;margin:0 calc(var(--pg) * -1);padding:6px var(--pg);border-bottom:1px solid var(--hair)}
+  body[data-route=shop] .filters .fhead h3{font-size:19px}
+  body[data-route=shop] .filters .fhead .ib{width:44px;height:44px}
+  body[data-route=shop] .filters .fdone{margin-top:14px}
+}
+@media (max-width:640px){
+  .shp-bar{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}
+  .shp-bar .fbtn{grid-column:1;justify-content:center;width:100%}
+  .shp-bar #sort{grid-column:2;width:100%}
+  .shp-count{grid-column:1;grid-row:2;margin:0;align-self:center}
+  .shp-bar .vt{grid-column:2;grid-row:2;justify-self:end}
+  .shp-bar .vt .lbl{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+  .shp-bar .vt button{padding:0 16px}
+  .wv{min-height:46px;font-size:15px}
+}
+
+/* ---------- PRODUCT ---------- */
+body[data-route=product] .wrap.pdw{max-width:1400px;padding-inline:var(--pg)}
+body[data-route=product] .pdw .crumbs{padding:clamp(4px,1vw,14px) 0 clamp(6px,1vw,12px)}
+/* the picture is sized to the screen's height so a whole saree is always in view, and it stays put while the details scroll */
+.pd{display:grid;grid-template-columns:auto minmax(320px,560px);justify-content:space-between;gap:clamp(40px,5vw,96px);align-items:start;padding-bottom:clamp(40px,5vw,80px)}
+.pd-media{display:grid;grid-template-columns:76px clamp(360px,calc((100dvh - 250px) * .8),800px);gap:14px;align-items:start;position:sticky;top:calc(var(--hdr) + 16px)}
+.pd-thumbs{display:flex;flex-direction:column;gap:10px;max-height:min(80vh,860px);overflow:auto;scrollbar-width:none}
+.pd-thumbs::-webkit-scrollbar{display:none}
+.pd-thumbs .thumb{flex:none;width:76px;aspect-ratio:4/5;background-size:cover;background-position:center;border:1px solid transparent;opacity:.6;transform:none;transition:opacity .25s,border-color .25s}
+.pd-thumbs .thumb:hover{opacity:1;transform:none}
+.pd-thumbs .thumb[aria-current=true]{opacity:1;border-color:var(--zari-hi)}
+.pd-stage{min-width:0}
+body[data-route=product] .mode{display:inline-flex;margin:0 0 10px;border:1px solid var(--hair);background:none}
+body[data-route=product] .mode button{height:44px;padding:0 16px;display:inline-flex;align-items:center;gap:8px;font:500 14px var(--sans);letter-spacing:0;text-transform:none;color:var(--mute);background:none}
+body[data-route=product] .mode button[aria-pressed=true]{background:rgba(242,233,218,.13);color:var(--ivory)}
+body[data-route=product] .mainimg{aspect-ratio:4/5;width:100%;background:var(--panel);border:0;box-shadow:none}
+body[data-route=product] .mainimg::after{display:none}
+body[data-route=product] .mainimg .lens{border:2px solid var(--zari-hi);box-shadow:0 12px 36px rgba(0,0,0,.5)}
+body[data-route=product] .mainimg .zl{left:auto;right:12px;top:12px;background:var(--ground);color:var(--ink);font:500 12px var(--sans);letter-spacing:0;padding:5px 9px;text-transform:none}
+@media (hover:none){body[data-route=product] .mainimg .zl,body[data-route=product] .mainimg .lens{display:none}}
+.pd-tag{position:absolute;left:0;top:0;z-index:3;padding:8px 13px;background:var(--ground);color:var(--ink);font:600 12.5px var(--sans)}
+body[data-route=product] .drape-stage{background:var(--panel)}
+.pd-cap{display:flex;justify-content:space-between;align-items:baseline;gap:6px 18px;flex-wrap:wrap;margin-top:12px;font:400 13px/1.5 var(--sans);color:var(--mute)}
+.pd-cap #lbl{font:500 14px var(--sans);color:var(--ivory)}
+body[data-route=product] .lights{display:flex;align-items:stretch;margin-top:14px;border:1px solid var(--hair);gap:0}
+body[data-route=product] .lights .lt{display:flex;align-items:center;padding:0 14px;font:500 14px var(--sans);color:var(--mute);white-space:nowrap}
+body[data-route=product] .lights button{flex:1;min-height:44px;padding:6px 8px;font:500 14px/1.2 var(--sans);letter-spacing:0;text-transform:none;color:var(--mute);background:none;border:0;border-left:1px solid var(--hair);border-radius:0}
+body[data-route=product] .lights button:hover{color:var(--ink);border-color:var(--hair)}
+body[data-route=product] .lights button[aria-pressed=true]{background:rgba(242,233,218,.14);color:var(--ivory)}
+
+body[data-route=product] .info{background:none;border:0;padding:0;backdrop-filter:none;-webkit-backdrop-filter:none;box-shadow:none;min-width:0}
+.pd-eyebrow{font:500 14px/1.4 var(--sans);color:var(--champ);margin:0}
+body[data-route=product] .info h1{font:600 clamp(28px,2.7vw,42px)/1.1 var(--serif);letter-spacing:-.02em;margin:8px 0 16px;color:var(--ivory)}
+body[data-route=product] .info .price{display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 14px;font:600 clamp(22px,1.9vw,28px) var(--sans);color:var(--ivory)}
+body[data-route=product] .info .price s{font:400 17px var(--sans);color:var(--mute)}
+body[data-route=product] .info .price .save{font:500 14px var(--sans);color:var(--ok)}
+body[data-route=product] .info .price small{flex-basis:100%;font:400 13px var(--sans);color:var(--mute);margin-top:2px}
+.pd-stock{display:flex;align-items:center;gap:8px;font:500 14px var(--sans);margin:16px 0 0;color:var(--ink)}
+.pd-stock .dot{width:8px;height:8px;border-radius:50%;flex:none}
+.pd-stock .sku{margin-left:auto;font:400 13px var(--sans);color:var(--mute)}
+.pd-desc{font:400 16px/1.65 var(--sans);color:var(--ink);margin:16px 0 0;max-width:60ch;opacity:.92}
+body[data-route=product] .specs{display:grid;grid-template-columns:1fr 1fr;gap:0 28px;margin:24px 0 22px;border-top:1px solid var(--hair)}
+body[data-route=product] .specs div{padding:12px 0;border-top:0;border-bottom:1px solid var(--hair)}
+body[data-route=product] .specs dt{font:500 13px var(--sans);letter-spacing:0;text-transform:none;color:var(--mute)}
+body[data-route=product] .specs dd{font:500 15px var(--sans);color:var(--ivory);margin:2px 0 0}
+.pd-opt{border:0;padding:0;margin:0 0 18px;min-width:0}
+.pd-opt legend{font:600 14.5px var(--sans);color:var(--ivory);padding:0;margin-bottom:2px}
+body[data-route=product] .addons{display:block;margin:0}
+body[data-route=product] .addons .check{display:flex;align-items:center;gap:12px;min-height:46px;font:400 15px var(--sans);color:var(--ink);border-bottom:1px solid var(--soft);cursor:pointer}
+body[data-route=product] .addons .check input{appearance:none;-webkit-appearance:none;width:20px;height:20px;margin:0;border:1.5px solid var(--gl);background:transparent;display:grid;place-content:center;flex:none;border-radius:0}
+body[data-route=product] .addons .check input:checked{background:var(--zari);border-color:var(--zari)}
+body[data-route=product] .addons .check input:checked::after{content:"";width:10px;height:5px;border-left:2px solid #1a0f08;border-bottom:2px solid #1a0f08;transform:rotate(-45deg) translate(1px,-1px)}
+body[data-route=product] .addons .c{margin-left:auto;color:var(--mute);font-size:14px}
+body[data-route=product] .pin{display:block;margin:6px 0 22px}
+body[data-route=product] .pin label{display:block;font:600 14.5px var(--sans);color:var(--ivory);margin-bottom:8px}
+body[data-route=product] .pin .row{display:flex;gap:10px;max-width:380px}
+body[data-route=product] .pin input{flex:1;min-width:0;height:48px;padding:0 14px;font:400 16px var(--sans);color:var(--ink);background:rgba(255,255,255,.04);border:1px solid var(--hair);border-radius:0}
+body[data-route=product] .pin .btn{height:48px}
+body[data-route=product] .pin .res{display:block;margin-top:8px;font:500 14px/1.45 var(--sans)}
+body[data-route=product] .cta-row{display:grid;grid-template-columns:52px minmax(0,1fr);gap:10px;margin:6px 0 4px}
+body[data-route=product] #addbag,body[data-route=product] #notify{grid-column:1/-1;height:56px;font-size:16px}
+body[data-route=product] #wishb{width:52px;padding:0;height:52px}
+body[data-route=product] #wishb[aria-pressed=true]{background:var(--zari);border-color:var(--zari);color:#1a0f08}
+body[data-route=product] #wishb[aria-pressed=true] svg{fill:currentColor}
+body[data-route=product] #vc{height:52px;padding:0 16px}
+.pd-acc{margin-top:28px;border-top:1px solid var(--hair)}
+.pd-acc details{border-bottom:1px solid var(--hair)}
+.pd-acc summary{list-style:none;display:flex;justify-content:space-between;align-items:center;min-height:54px;font:600 15px var(--sans);color:var(--ivory);cursor:pointer}
+.pd-acc summary::-webkit-details-marker{display:none}
+.pd-acc summary::after{content:"";width:8px;height:8px;border-right:1.6px solid var(--mute);border-bottom:1.6px solid var(--mute);transform:rotate(45deg) translateY(-2px);transition:transform .25s}
+.pd-acc details[open] summary::after{transform:rotate(-135deg) translateY(-2px)}
+.pd-acc details>div{padding:0 0 20px;font:400 15px/1.7 var(--sans);color:var(--mute);max-width:62ch}
+.pd-acc details>div p{margin:0 0 12px}
+.pd-acc .pd-links{display:flex;flex-wrap:wrap;gap:0 22px;margin:0}
+.pd-acc details>div a{color:var(--ink);text-decoration:underline;text-decoration-color:var(--zari);text-underline-offset:4px;display:inline-flex;align-items:center;min-height:44px}
+.pd-note{font:400 13px/1.5 var(--sans);color:var(--mute);margin:18px 0 0}
+.pd-more{padding:clamp(28px,4vw,56px) 0 clamp(20px,3vw,40px);border-top:1px solid var(--hair)}
+.pd-more[hidden]{display:none}
+.pd-mh{display:flex;justify-content:space-between;align-items:baseline;gap:16px;margin-bottom:clamp(16px,2vw,26px)}
+.pd-mh h2{font:600 clamp(22px,2vw,30px)/1.15 var(--serif);letter-spacing:-.015em;color:var(--ivory);background:none;-webkit-text-fill-color:currentColor}
+body[data-route=product] .stickybuy{background:rgba(11,7,9,.97);backdrop-filter:none;-webkit-backdrop-filter:none;border-top:1px solid var(--hair);padding-bottom:env(safe-area-inset-bottom)}
+body[data-route=product] .stickybuy .in{max-width:1680px;padding:10px var(--pg);display:flex;align-items:center;gap:16px}
+body[data-route=product] .stickybuy .nm{display:flex;flex-direction:column;gap:1px;min-width:0;margin-right:auto}
+body[data-route=product] .stickybuy .nm b{font:600 15px/1.3 var(--sans);color:var(--ivory);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+body[data-route=product] .stickybuy .pr{margin:0;font:500 14px var(--sans);color:var(--champ)}
+body[data-route=product] .stickybuy .btn{height:48px;min-width:150px}
+
+/* tablets and phones: one column, thumbnails under the picture, picture edge to edge on phones */
+@media (max-width:900px){
+  .pd{grid-template-columns:minmax(0,1fr);gap:26px;justify-content:stretch}
+  .pd-media{grid-template-columns:minmax(0,1fr);max-width:none;position:static}
+  .pd-thumbs{flex-direction:row;order:2;max-height:none;overflow-x:auto;scroll-snap-type:x proximity;padding:2px 0;gap:8px}
+  .pd-thumbs .thumb{width:60px;scroll-snap-align:start}
+  body[data-route=product] .specs{grid-template-columns:1fr 1fr}
+}
+@media (min-width:701px) and (max-width:900px){.pd-stage{max-width:580px;width:100%;margin-inline:auto}.pd-thumbs{justify-content:center}}
+@media (max-width:700px){
+  .pd-stage>.mwrap{margin-inline:calc(var(--pg) * -1)}
+  body[data-route=product] .lights{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+  body[data-route=product] .lights .lt{grid-column:1/-1;padding:10px 14px 4px}
+  body[data-route=product] .lights button{border-left:0;border-top:1px solid var(--hair)}
+  body[data-route=product] .lights button:nth-child(odd){border-left:0}
+  body[data-route=product] .lights button:nth-child(even){border-left:1px solid var(--hair)}
+  body[data-route=product] .info h1{font-size:clamp(26px,7.4vw,32px)}
+  body[data-route=product] .stickybuy .btn{min-width:130px}
+}
+/* a phone on its side: picture and details sit side by side so neither is a long scroll */
+@media (orientation:landscape) and (max-height:540px) and (max-width:1000px){
+  body[data-route=product] .pd{grid-template-columns:minmax(0,.9fr) minmax(0,1fr);gap:22px}
+  .pd-media{grid-template-columns:minmax(0,1fr)}
+  .pd-stage{max-width:min(100%,calc((100dvh - 150px) * .8))}
+  .pd-stage>.mwrap{margin-inline:0}
+}
+@media (max-width:340px){.pd-thumbs .thumb{width:54px}body[data-route=product] .specs{grid-template-columns:minmax(0,1fr)}}
+@media (prefers-reduced-motion:reduce){:is(body[data-route=shop],body[data-route=product]) *{scroll-behavior:auto!important}}

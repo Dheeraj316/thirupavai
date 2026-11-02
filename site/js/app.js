@@ -4,7 +4,7 @@ import { ONLINE, MODE, LIVE, T, biz } from './api.js';
 import { $, $$, h, ic, toast, openLayer, closeAll, esc, img, money, reveal } from './ui.js';
 import { COLLECTIONS, bySlug } from './data.js';
 import { initCursor, initMagnetic, splitText, observeReveal, curtain, lotusPath } from './fx.js';
-import { initExtras } from './extras.js';
+import { initExtras, toggleSound } from './extras.js';
 import { glReady } from './gate.js';
 initCursor(); initMagnetic();
 // once a warp-slat reveal has finished, drop the mask so no seams remain between slats
@@ -49,21 +49,28 @@ async function render() {
 
 // ---------- header / footer
 const hdr = $('#hdr'), ftr = $('#ftr');
+// a slim promise strip above the header: the same rules the checkout applies (free standard delivery, 7-day returns, authenticity passport)
+hdr.insertAdjacentElement('beforebegin', h('<div id="annc" role="note">Free standard delivery <i></i> 7-day returns <i></i> Every saree comes with its own authenticity passport</div>'));
 function drawHeader() {
   const s = state(); const bag = cart.count(); const wc = s.wish.length;
   hdr.innerHTML = `<div class="wrap hdr-in">
     <nav class="nav-l" aria-label="Primary"><a href="#/shop">Shop Sarees</a><a href="#/shop?collection=bridal">Collections</a><a href="#/shop?sort=new">New Arrivals</a><a href="#/shop?occasion=Bridal">Bridal</a><a href="#/shop?occasion=Festive">Festive</a></nav>
     <button class="burger ib" id="burger" aria-label="Open menu">${ic('menu', 24)}</button>
     <a class="logo serif" href="#/" aria-label="Thirupavai — home">THIRUPAVAI</a>
-    <div class="nav-r"><a class="tx" href="#/story">Our Story</a>
+    <div class="nav-r"><button class="tx navlink" id="navFind" type="button">Find my saree</button><a class="tx" href="#/story">Our Story</a>
       <button class="ib" id="sbtn" aria-label="Search">${ic('search', 22)}</button>
       <a class="ib" href="#/account" aria-label="Account">${ic('user', 22)}</a>
       <a class="ib" href="#/wishlist" aria-label="Wishlist, ${wc} saved">${ic('heart', 22)}${wc ? `<span class="badge">${wc}</span>` : ''}</a>
       <button class="ib" id="bbtn" aria-label="Open bag, ${bag} items">${ic('bag', 22)}${bag ? `<span class="badge">${bag}</span>` : ''}</button></div></div>
     <div class="wrap hdr-m"><button class="msearch" id="msearch" type="button" aria-label="Search sarees">${ic('search', 20)}<span>Search sarees, silks, weaves…</span></button></div>`;
   $('#bbtn').onclick = openBag; $('#sbtn').onclick = openSearch; $('#burger').onclick = openMenu; $('#msearch').onclick = openSearch;
+  $('#navFind').onclick = openFinder;
   drawMobileNav();
 }
+
+// The style finder (a short quiz that ranks the sarees for you) lives in the header, the menu and the footer rather than in a floating button.
+const openFinder = () => document.getElementById('dkStylist')?.click();
+const soundLabel = () => { const on = document.getElementById('dkSound')?.getAttribute('aria-pressed') === 'true'; const b = document.getElementById('ftSound'); if (b) { b.setAttribute('aria-pressed', on); b.textContent = on ? 'Ambient sound: on' : 'Ambient sound: off'; } };
 
 // ---------- phone navigation: category row under the search field, tab bar at the bottom (CSS shows them on phones only)
 const RAIL = [['All sarees', '#/shop'], ['New', '#/shop?sort=new'], ['Bridal', '#/shop?occasion=Bridal'], ['Festive', '#/shop?occasion=Festive'], ['Kanchipuram', '#/shop?fabric=Kanchipuram%20silk'], ['Banarasi', '#/shop?fabric=Banarasi%20silk'], ['Mysore', '#/shop?fabric=Mysore%20silk'], ['Organza', '#/shop?fabric=Organza']];
@@ -82,12 +89,14 @@ function drawMobileNav() {
 }
 function drawFooter() {
   ftr.innerHTML = `<div class="band" aria-hidden="true"></div><div class="wrap"><div class="cols"><div><div class="logo serif">THIRUPAVAI</div><p style="max-width:300px">Tradition, Woven Into Tomorrow. A premium saree house${T(' — concept prototype with sample data', '')}.</p></div>
-    <div><h3>Shop</h3><a href="#/shop">All sarees</a><a href="#/shop?occasion=Bridal">Bridal</a><a href="#/shop?occasion=Festive">Festive</a><a href="#/shop?sort=new">New arrivals</a></div>
+    <div><h3>Shop</h3><a href="#/shop">All sarees</a><a href="#/shop?occasion=Bridal">Bridal</a><a href="#/shop?occasion=Festive">Festive</a><a href="#/shop?sort=new">New arrivals</a><button class="ft-link" id="ftFind" type="button">Find my saree</button></div>
     <div><h3>Care</h3><a href="#/page/shipping">Shipping &amp; delivery</a><a href="#/page/returns">Returns &amp; exchanges</a><a href="#/page/faqs">FAQs</a><a href="#/page/contact">Contact</a></div>
     <div><h3>Trust</h3><a href="#/page/privacy">Privacy</a><a href="#/page/terms">Terms</a><a href="#/page/security">Security updates</a>${ONLINE ? '' : '<a href="#/admin">Admin console (demo)</a>'}</div></div>
     <div class="fine">${T('Concept prototype · sample products and prices · test-mode payments only · no real orders, shipments or customer data. Imagery is AI-generated concept imagery and supplied references — replace with licensed or original photography before launch. Domain, legal entity, GST and trademark status are unconfirmed.',
       `© ${new Date().getFullYear()} ${esc(biz.name)}${biz.gstin ? ' · GSTIN ' + esc(biz.gstin) : ''}${biz.supportEmail ? ' · <a href="mailto:' + esc(biz.supportEmail) + '">' + esc(biz.supportEmail) + '</a>' : ''}${biz.supportPhone ? ' · ' + esc(biz.supportPhone) : ''}`,
-      'STAGING SITE · test payments only · orders placed here are not real and will not be shipped.')}</div></div>`;
+      'STAGING SITE · test payments only · orders placed here are not real and will not be shipped.')}</div>
+    <div class="ft-tools"><button class="ft-link" id="ftSound" type="button" aria-pressed="false" title="A quiet tanpura and temple bells while you browse">Ambient sound: off</button></div></div>`;
+  $('#ftFind').onclick = openFinder; $('#ftSound').onclick = () => { toggleSound(); soundLabel(); };
 }
 
 // ---------- bag drawer
@@ -135,8 +144,8 @@ function openSearch() {
 // ---------- mobile menu
 function openMenu() {
   const m = h(`<aside class="drawer left" role="dialog" aria-modal="true" aria-label="Menu"><header><h2 class="serif" style="font-size:30px">THIRUPAVAI</h2><button class="ib" aria-label="Close menu" id="mx">${ic('x', 24)}</button></header>
-    <div class="body" style="padding-top:12px;font:500 18px var(--serif)"><nav style="display:grid;gap:4px;font-size:26px">${[['Shop Sarees', '#/shop'], ['Collections', '#/shop?collection=bridal'], ['New Arrivals', '#/shop?sort=new'], ['Bridal', '#/shop?occasion=Bridal'], ['Festive', '#/shop?occasion=Festive'], ['Our Story', '#/story'], ['Wishlist', '#/wishlist'], ['Account', '#/account'], ['FAQs', '#/page/faqs']].map(([t, l]) => `<a href="${l}" style="padding:10px 0;border-bottom:1px solid var(--line)">${t}</a>`).join('')}</nav></div></aside>`);
-  openLayer(m); $('#mx', m).onclick = closeAll; $$('a', m).forEach((a) => a.addEventListener('click', closeAll));
+    <div class="body" style="padding-top:12px;font:500 18px var(--serif)"><nav style="display:grid;gap:4px;font-size:26px">${[['Shop Sarees', '#/shop'], ['Collections', '#/shop?collection=bridal'], ['New Arrivals', '#/shop?sort=new'], ['Bridal', '#/shop?occasion=Bridal'], ['Festive', '#/shop?occasion=Festive'], ['Our Story', '#/story'], ['Wishlist', '#/wishlist'], ['Account', '#/account'], ['FAQs', '#/page/faqs']].map(([t, l]) => `<a href="${l}" style="padding:10px 0;border-bottom:1px solid var(--line)">${t}</a>`).join('')}<button id="mfind" type="button" style="padding:10px 0;border:0;border-bottom:1px solid var(--line);text-align:left;font:inherit;color:inherit;background:none">Find my saree</button></nav></div></aside>`);
+  openLayer(m); $('#mx', m).onclick = closeAll; $('#mfind', m).onclick = () => { closeAll(); setTimeout(openFinder, 250); }; $$('a', m).forEach((a) => a.addEventListener('click', closeAll));
 }
 
 // ---------- intro (first visit only, skippable, respects reduced motion)

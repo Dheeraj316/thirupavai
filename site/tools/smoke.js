@@ -21,7 +21,7 @@ const ok = (name, pass, extra = '') => { results.push({ name, pass, extra }); co
 
   // --- home
   await page.goto(BASE); await page.waitForSelector('.hero2 h1'); await page.waitForTimeout(3200);
-  ok('home hero renders', (await txt('.hero2 .tagline')).includes('woven into tomorrow') && (await txt('.hero2 h1')).toLowerCase().includes('thirupavai')); await shot('01_home_hero');
+  ok('home hero renders', (await txt('.hero2 .tagline')).includes('woven into tomorrow') && (await txt('.hero2 h1')).toLowerCase().includes('silk sarees')); await shot('01_home_hero');
   ok('WebGL silk backdrop is live', await page.evaluate(() => { const c = document.getElementById('stagebg'); return !!c && !!(c.getContext('webgl2') || c.getContext('webgl')) && !document.documentElement.classList.contains('no-gl'); }));
   await page.evaluate(() => document.querySelector('#tun').scrollIntoView()); await page.waitForTimeout(2600); await shot('02_home_tunnel');
   ok('3D silk tunnel canvas present', await page.locator('#tunc').count() === 1);
@@ -92,7 +92,7 @@ const ok = (name, pass, extra = '') => { results.push({ name, pass, extra }); co
   ok('admin: shipment created with AWB', (await adm.locator('.drawer.on').innerText()).includes('AWB TPV-SAMPLE'));
   await page.waitForTimeout(400); ok('customer tracking page synced from admin (cross-tab)', (await page.locator('.tl .nd.cur b').innerText()) === 'Dispatched', await page.locator('.tl .nd.cur b').innerText());
   await page.screenshot({ path: path.join(QA, '09_order_dispatched.png') });
-  ok('dark route map renders with travelled path', await page.evaluate(() => { const r = document.querySelector('#rd'); return !!r && r.getAttribute('stroke') === 'url(#rg)' && !!document.querySelector('#veh'); }));
+  ok('delivery progress shows the stage reached (no drawn map)', await page.evaluate(() => { const f = document.querySelector('.tl .fill'); const done = document.querySelectorAll('.tl .nd.done').length; return !!f && done >= 1 && !document.querySelector('.mapbox'); }));
   // --- role permissions
   await adm.keyboard.press('Escape'); await adm.selectOption('#role', 'Customer Support'); await adm.goto(BASE + '#/admin/payments'); await adm.waitForTimeout(1500); ok('Customer Support denied payments', (await adm.locator('.adm-main').innerText()).toLowerCase().includes('no access'));
   await adm.selectOption('#role', 'Finance Manager'); await adm.goto(BASE + '#/admin/payments'); await adm.waitForTimeout(1500); ok('Finance Manager sees payments', (await adm.locator('.adm-main').innerText()).toLowerCase().includes('reconcil') || !(await adm.locator('.adm-main').innerText()).toLowerCase().includes('no access'));
@@ -114,7 +114,7 @@ const ok = (name, pass, extra = '') => { results.push({ name, pass, extra }); co
   await page.fill('#mob', '9000000003'); await page.click('#sendotp'); await page.waitForSelector('#otp'); for (let t = 0; t < 3; t++) { for (let i = 0; i < 6; i++) await page.fill('#o' + i, '1'); await page.waitForTimeout(150); }
   await page.waitForTimeout(1200); ok('OTP locks after 3 wrong attempts', await page.locator('#otp').count() === 0 || (await txt('#e-otp')).includes('Too many'));
   // --- extras: stylist quiz, Ctrl+K palette, light studio, compare, ambient sound, scroll thread
-  await nav('#/', 'home'); await page.waitForSelector('#dkStylist'); await page.evaluate(() => window.scrollTo(0, innerHeight)); await page.waitForTimeout(700); await page.click('#dkStylist'); await page.waitForSelector('.qopt'); await page.click('.qopt[data-v=Bridal]'); await page.waitForSelector('.qsw'); await page.click('.qsw button[data-v=Maroon]'); await page.click('#qn'); await page.waitForSelector('.qopt'); await page.click('.qopt[data-v=hi]'); await page.waitForSelector('.qr'); await page.waitForTimeout(700);
+  await nav('#/', 'home'); await page.waitForSelector('#navFind'); await page.click('#navFind'); await page.waitForSelector('.qopt'); await page.click('.qopt[data-v=Bridal]'); await page.waitForSelector('.qsw'); await page.click('.qsw button[data-v=Maroon]'); await page.click('#qn'); await page.waitForSelector('.qopt'); await page.click('.qopt[data-v=hi]'); await page.waitForSelector('.qr'); await page.waitForTimeout(700);
   ok('stylist quiz returns three ranked sarees', (await page.locator('.qr').count()) === 3 && (await txt('.qr .mt')).toLowerCase().includes('match'), (await page.locator('.qr b').allInnerTexts()).join(' | ')); await shot('14_stylist_results');
   await page.keyboard.press('Escape'); await page.waitForTimeout(500);
   await page.keyboard.press('Control+k'); await page.waitForSelector('#ckq'); await page.waitForFunction(() => document.activeElement && document.activeElement.id === 'ckq'); await page.keyboard.type('royal'); await page.waitForTimeout(300);
@@ -126,9 +126,10 @@ const ok = (name, pass, extra = '') => { results.push({ name, pass, extra }); co
   ok('compare list caps at three sarees', (await page.locator('.cmptray.on').count()) === 1 && (await txt('#ctn')) === '3'); await page.click('#ctgo'); await page.waitForSelector('.cmp-grid'); await page.waitForTimeout(500);
   ok('compare modal shows three columns', (await page.locator('.cmp-grid .ch').count()) === 3); await shot('17_compare_modal');
   await page.locator('[data-rm]').first().click(); await page.waitForSelector('.modal.on .cmp-grid'); await page.waitForTimeout(400); ok('removing one keeps a two-way compare', (await page.locator('.modal.on .cmp-grid .ch').count()) === 2); await page.keyboard.press('Escape');
-  await page.click('#dkSound'); await page.waitForTimeout(500); const snd1 = await page.locator('#dkSound').getAttribute('aria-pressed'); await page.click('#dkSound'); await page.waitForTimeout(300); const snd2 = await page.locator('#dkSound').getAttribute('aria-pressed');
+  await page.evaluate(() => scrollTo(0, document.documentElement.scrollHeight)); await page.waitForTimeout(400);
+  await page.click('#ftSound'); await page.waitForTimeout(500); const snd1 = await page.locator('#dkSound').getAttribute('aria-pressed'); await page.click('#ftSound'); await page.waitForTimeout(300); const snd2 = await page.locator('#dkSound').getAttribute('aria-pressed');
   ok('ambient sound toggles on and off', snd1 === 'true' && snd2 === 'false', `${snd1} → ${snd2}`);
-  await page.evaluate(() => scrollTo(0, document.documentElement.scrollHeight)); await page.waitForTimeout(500); ok('gold scroll thread tracks progress', Number(await page.evaluate(() => getComputedStyle(document.querySelector('.gthread')).getPropertyValue('--p'))) > 0.8);
+  await page.evaluate(() => scrollTo(0, document.documentElement.scrollHeight)); await page.waitForTimeout(500); const promise = await page.locator('#annc').innerText(); ok('promise strip states the delivery and returns rules', /Free standard delivery/.test(promise) && /7-day returns/.test(promise));
   // --- mobile (true 390px layout viewport so overflow is measurable)
   const mob = await browser.newContext({ viewport: { width: 390, height: 844 }, hasTouch: true }); await mob.addInitScript(seed); const m = await mob.newPage(); m.on('pageerror', (e) => errors.push('mobile pageerror: ' + String(e).slice(0, 300)));
   await m.goto(BASE); await m.waitForSelector('.hero2 h1'); await m.waitForTimeout(3200); await m.screenshot({ path: path.join(QA, '11_mobile_home.png') });

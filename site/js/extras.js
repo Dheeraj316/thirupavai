@@ -165,33 +165,13 @@ function buildDock() {
   document.body.appendChild(dock);
   $('#dkStylist', dock).onclick = openStylist; $('#dkSound', dock).onclick = toggleSound; $('#dkCmd', dock).onclick = openPalette;
 }
-function buildThread() {
-  const th = h('<div class="gthread" aria-hidden="true"><i class="gt-fill"></i><i class="gt-head"></i></div>'); document.body.appendChild(th);
-  let raf = 0; const upd = () => { raf = 0; const max = Math.max(1, document.documentElement.scrollHeight - innerHeight); th.style.setProperty('--p', Math.min(1, Math.max(0, scrollY / max)).toFixed(4)); };
-  const q = () => { if (!raf) raf = requestAnimationFrame(upd); };
-  addEventListener('scroll', q, { passive: true }); addEventListener('resize', q); new ResizeObserver(q).observe(document.body); upd();
-}
-/* ------------------------------------------------------------------ cursor gold-thread trail (+ silk kick on fast scroll) */
+/* The gold scroll thread and the glowing cursor trail were decoration with no job; they are gone. Only the silk kick on fast scrolling stays. */
 function buildTrail() {
-  if (!matchMedia('(hover:hover) and (pointer:fine)').matches || matchMedia('(prefers-reduced-motion:reduce)').matches) return;
-  const cv = h('<canvas id="trail" aria-hidden="true"></canvas>'); document.body.appendChild(cv); const g = cv.getContext('2d'); let W = 0, H = 0;
-  const size = () => { W = cv.width = innerWidth; H = cv.height = innerHeight; }; size(); addEventListener('resize', size);
-  const N = 24, pts = Array.from({ length: N }, () => ({ x: -99, y: -99 })); let mx = -99, my = -99, last = 0, raf = 0;
-  addEventListener('pointermove', (e) => { mx = e.clientX; my = e.clientY; last = performance.now(); if (!raf) raf = requestAnimationFrame(frame); }, { passive: true });
-  function frame(now) {
-    g.clearRect(0, 0, W, H); let p0 = { x: mx, y: my };
-    for (let i = 0; i < N; i++) { const p = pts[i]; p.x += (p0.x - p.x) * (0.46 - i * 0.012); p.y += (p0.y - p.y) * (0.46 - i * 0.012); p0 = p; }
-    g.lineCap = 'round'; g.lineJoin = 'round';
-    for (let i = 0; i < N - 1; i++) {
-      const a = pts[i], b = pts[i + 1], k = 1 - i / N; g.beginPath(); g.moveTo(a.x, a.y); g.lineTo(b.x, b.y);
-      g.strokeStyle = `rgba(243,223,166,${(0.55 * k * k).toFixed(3)})`; g.lineWidth = 0.6 + 2.6 * k; g.stroke();
-    }
-    raf = now - last < 900 ? requestAnimationFrame(frame) : 0; if (!raf) g.clearRect(0, 0, W, H);
-  }
+  if (matchMedia('(prefers-reduced-motion:reduce)').matches) return;
   let sy = scrollY, st = 0; addEventListener('scroll', () => { const t = performance.now(); if (t - st < 90) return; const d = Math.abs(scrollY - sy); sy = scrollY; st = t; if (d > 140) window.__stage?.kick(Math.min(.35, d / 1800)); }, { passive: true });
 }
 export function initExtras(api) {
-  API = { ...API, ...api }; buildDock(); buildThread(); buildTray(); buildTrail();
+  API = { ...API, ...api }; buildDock(); buildTray(); buildTrail();
   document.addEventListener('keydown', (e) => {
     if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); openPalette(); }
   });
