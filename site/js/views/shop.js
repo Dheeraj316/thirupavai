@@ -56,8 +56,9 @@ export default async function shop(root, route) {
     const nearest = () => Math.round(-rot / step) * step * -1;
     const tick = () => { if (!alive) return; if (!drag) { if (snap != null) { rot += (snap - rot) * 0.12; if (Math.abs(snap - rot) < .05) { rot = snap; snap = null; } } else if (Math.abs(vel) > .02) { rot += vel; vel *= .94; if (Math.abs(vel) <= .3) snap = nearest(); } else if (!hover && !reduce()) rot -= 0.06; } layout(); raf = requestAnimationFrame(tick); };
     const go = (d) => { snap = -(Math.round(-rot / step) + d) * step; vel = 0; };
-    wrap.addEventListener('pointerdown', (e) => { drag = { x: e.clientX }; moved = 0; vel = 0; snap = null; wrap.classList.add('drag'); wrap.setPointerCapture(e.pointerId); });
-    wrap.addEventListener('pointermove', (e) => { if (!drag) return; const dx = e.clientX - drag.x; drag.x = e.clientX; moved += Math.abs(dx); rot += dx * .32; vel = dx * .32; });
+    // the ring captures the pointer only once a real drag starts: capturing on touch-down swallowed taps, so tapping a card did nothing on a phone
+    wrap.addEventListener('pointerdown', (e) => { drag = { x: e.clientX, id: e.pointerId, cap: false }; moved = 0; vel = 0; snap = null; wrap.classList.add('drag'); });
+    wrap.addEventListener('pointermove', (e) => { if (!drag) return; const dx = e.clientX - drag.x; drag.x = e.clientX; moved += Math.abs(dx); if (!drag.cap && moved > 6) { drag.cap = true; try { wrap.setPointerCapture(drag.id); } catch {} } rot += dx * .32; vel = dx * .32; });
     const up = () => { if (!drag) return; drag = null; wrap.classList.remove('drag'); if (Math.abs(vel) <= .3) snap = nearest(); };
     wrap.addEventListener('pointerup', up); wrap.addEventListener('pointercancel', up); wrap.addEventListener('mouseenter', () => (hover = true)); wrap.addEventListener('mouseleave', () => (hover = false));
     wrap.addEventListener('click', (e) => { if (moved > 6) { e.preventDefault(); e.stopPropagation(); } }, true);

@@ -36,6 +36,17 @@ const cover = (tex, pw, ph) => { const ta = tex.image.width / tex.image.height, 
 const ease = (x) => 1 - Math.pow(1 - Math.min(1, Math.max(0, x)), 3);
 const reduce = motionReduced;
 
+// Choosing a cloth. A mouse picks on press, as before. A finger picks only on a clean tap: it must lift within 10 px and half a second, and the
+// browser must not have claimed the gesture for scrolling (pointercancel). Before, any swipe that happened to start on a cloth opened that saree.
+function bindPick(canvas, ptr, hit, onPick) {
+  const set = (e) => { const b = canvas.getBoundingClientRect(); ptr.x = ((e.clientX - b.left) / b.width) * 2 - 1; ptr.y = -(((e.clientY - b.top) / b.height) * 2 - 1); };
+  let down = null; const rest = (e) => { if (e.pointerType !== 'mouse') { ptr.x = 0; ptr.y = 0; } };
+  canvas.addEventListener('pointerdown', (e) => { set(e); if (e.pointerType === 'mouse') { const o = hit(); if (o) onPick?.(o.userData.slug); return; } down = { x: e.clientX, y: e.clientY, t: performance.now(), id: e.pointerId }; });
+  canvas.addEventListener('pointermove', (e) => { if (down && e.pointerId === down.id && Math.hypot(e.clientX - down.x, e.clientY - down.y) > 10) down = null; });
+  canvas.addEventListener('pointerup', (e) => { const d = down; down = null; if (d && e.pointerId === d.id && Math.hypot(e.clientX - d.x, e.clientY - d.y) <= 10 && performance.now() - d.t <= 500) { set(e); const o = hit(); if (o) onPick?.(o.userData.slug); } rest(e); });
+  canvas.addEventListener('pointercancel', (e) => { down = null; rest(e); });
+}
+
 function makeRenderer(canvas) {
   const r = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true }); r.setClearColor(0x000000, 0);
   const fit = () => { const w = canvas.clientWidth || 600, h = canvas.clientHeight || 400; r.setPixelRatio(Math.min(devicePixelRatio || 1, 2)); r.setSize(w, h, false); return [w, h]; };
@@ -67,7 +78,7 @@ export async function silkGallery(canvas, items, onPick, section) {
   canvas.addEventListener('pointermove', (e) => { const b = canvas.getBoundingClientRect(); ptr.x = ((e.clientX - b.left) / b.width) * 2 - 1; ptr.y = -(((e.clientY - b.top) / b.height) * 2 - 1); });
   canvas.addEventListener('pointerleave', () => { ptr.x = 0; ptr.y = 0; hover = null; canvas.style.cursor = ''; });
   const ray = new THREE.Raycaster(); const hit = () => { ray.setFromCamera(new THREE.Vector2(ptr.x, ptr.y), cam); const h = ray.intersectObjects(panels, false)[0]; return h ? h.object : null; };
-  canvas.addEventListener('pointerdown', (e) => { const b = canvas.getBoundingClientRect(); ptr.x = ((e.clientX - b.left) / b.width) * 2 - 1; ptr.y = -(((e.clientY - b.top) / b.height) * 2 - 1); const o = hit(); if (o) onPick?.(o.userData.slug); });
+  bindPick(canvas, ptr, hit, onPick);
   const stop = loopWhenVisible(canvas, (t) => {
     if (born === null) born = t; const tin = t - born;
     ptr.sx += (ptr.x - ptr.sx) * 0.06; ptr.sy += (ptr.y - ptr.sy) * 0.06;
@@ -104,7 +115,7 @@ export async function silkTunnel(canvas, items, { onPick, onIndex, section } = {
   canvas.addEventListener('pointermove', (e) => { const b = canvas.getBoundingClientRect(); ptr.x = ((e.clientX - b.left) / b.width) * 2 - 1; ptr.y = -(((e.clientY - b.top) / b.height) * 2 - 1); });
   canvas.addEventListener('pointerleave', () => { ptr.x = ptr.y = 0; hover = null; canvas.style.cursor = ''; });
   const ray = new THREE.Raycaster(); const hit = () => { ray.setFromCamera(new THREE.Vector2(ptr.x, ptr.y), cam); const h = ray.intersectObjects(panels, false)[0]; return h ? h.object : null; };
-  canvas.addEventListener('pointerdown', (e) => { const b = canvas.getBoundingClientRect(); ptr.x = ((e.clientX - b.left) / b.width) * 2 - 1; ptr.y = -(((e.clientY - b.top) / b.height) * 2 - 1); const o = hit(); if (o) onPick?.(o.userData.slug); });
+  bindPick(canvas, ptr, hit, onPick);
   const stop = loopWhenVisible(canvas, (t) => {
     let p = .5; if (section) { const b = section.getBoundingClientRect(); p = Math.min(1, Math.max(0, -b.top / Math.max(1, b.height - innerHeight))); }
     ps += (p - ps) * (reduce() ? 1 : .09); ptr.sx += (ptr.x - ptr.sx) * .06; ptr.sy += (ptr.y - ptr.sy) * .06;
