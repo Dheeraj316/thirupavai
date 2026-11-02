@@ -1,0 +1,67 @@
+# Render Blueprint — TEMPORARY load-test copy of staging (paid plans, three web instances, abuse limits raised). Delete it from Render when the test is done.
+# Create it in Render: New > Blueprint > this repository > Blueprint file path: render.loadtest.yaml  (Render asks for a card because these are paid plans).
+# Why a separate copy: the sign-in abuse guards exist to stop one address hammering the shop, and a load test IS one address, so they are raised here only.
+# The name contains "staging" on purpose: the server only allows on-screen test codes and the fake payment gateway on addresses that do.
+# Never point this at the real shop, and never copy these limits into render.production.yaml.
+databases:
+  - name: thirupavai-load-db
+    region: singapore
+    plan: 1c-2g
+    postgresMajorVersion: "17"
+    diskSizeGB: 10
+    ipAllowList: []
+
+services:
+  - type: keyvalue
+    name: thirupavai-load-kv
+    region: singapore
+    plan: 1g
+    maxmemoryPolicy: volatile-lru
+    ipAllowList: []
+
+  - type: web
+    name: thirupavai-staging-load          # https://thirupavai-staging-load.onrender.com
+    runtime: docker
+    region: singapore
+    plan: 1c-2g
+    numInstances: 3                        # three single-core instances behind Render's load balancer; sessions and codes live in the shared key-value store
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /healthz
+    autoDeployTrigger: "off"
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PUBLIC_URL
+        value: https://thirupavai-staging-load.onrender.com
+      - key: APP_SECRET
+        generateValue: true
+      - key: DATABASE_URL
+        fromDatabase: { name: thirupavai-load-db, property: connectionString }
+      - key: REDIS_URL
+        fromService: { type: keyvalue, name: thirupavai-load-kv, property: connectionString }
+      - key: WEB_CONCURRENCY
+        value: "1"                         # one process per core on this plan
+      - key: PG_POOL_MAX
+        value: "10"                        # 3 instances x 10 = 30 database connections
+      - key: SEED_ADMIN_MOBILE
+        value: "9000000001"                # throw-away number: this copy holds no real data and is deleted after the test
+      - key: OTP_MODE
+        value: demo
+      - key: ALLOW_DEMO_OTP
+        value: "1"
+      - key: PAYMENTS_MODE
+        value: mock
+      - key: ALLOW_MOCK_PAYMENTS
+        value: "1"
+      - key: BUSINESS_NAME
+        value: Thirupavai (load test)
+      # --- limits raised for the test only
+      - key: OTP_PER_IP
+        value: "100000000"
+      - key: API_RATE_PER_MIN
+        value: "100000000"
+      - key: OTP_DAILY_CAP
+        value: "100000000"
+      - key: OTP_PER_MOBILE
+        value: "100"

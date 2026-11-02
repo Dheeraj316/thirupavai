@@ -54,6 +54,14 @@ What "handles 10,000 at once" means here: the web servers keep **no state** (ses
 - [ ] **Load test from a separate machine** (k6 Cloud or any cloud VM — not a laptop): `k6 run -e BASE=https://thirupavai-staging.onrender.com -e VUS=10000 app/test/k6-login-storm.js`. For the duration of the test set `OTP_PER_IP`, `API_RATE_PER_MIN`, `OTP_DAILY_CAP`, `OTP_PER_MOBILE` to very large values on staging (the abuse guards would block one address) and restore them after. **Pass = under 0.5 % errors, p95 < 1.5 s, p99 < 3 s.** If it misses, add instances or move the database up a plan, and repeat.
 - [ ] Never run that test against production.
 
+### 4b. The 10,000-user load test — plan (not yet run)
+
+1. **Paid copy of staging, ready to deploy: `render.loadtest.yaml`** (3 web instances of `1c-2g`, Postgres `1c-2g`, key-value `1g`, abuse limits already raised, address `thirupavai-staging-load.onrender.com`). In Render: New → Blueprint → this repository → Blueprint file path `render.loadtest.yaml`. Render asks for a card for paid plans; you add it. Billing is per second. Render's pricing pages could not be read automatically, so check the monthly total shown on the Blueprint page before pressing Apply (the plan names are Render's own; third-party lists suggest roughly $100–150 a month for this size, i.e. a few dollars for a few hours). **Delete the Blueprint's services as soon as the test is done.**
+2. **The abuse limits are raised in that copy only** (`OTP_PER_IP`, `API_RATE_PER_MIN`, `OTP_DAILY_CAP`, `OTP_PER_MOBILE`). Never copy them to production.
+3. **Run the load from outside the servers.** From a PC with Node: `node app/test/load.js https://thirupavai-staging-load.onrender.com --users 10000 --concurrency 2000` (10,000 customers each request a code, sign in, read their session and the catalogue; prints errors and p50/p95/p99 per step and exits 1 on a miss). For a harder, many-address test use k6: `k6 run -e BASE=https://thirupavai-staging-load.onrender.com -e VUS=10000 app/test/k6-login-storm.js` from k6 Cloud or a cloud machine (10,000 virtual users for about 2 minutes is roughly 330 VU-hours; k6 Cloud's free plan includes 500 VU-hours a month, but whether it allows 10,000 at once has not been confirmed; pay-as-you-go is about $0.15 per VU-hour).
+4. **Pass mark:** under 0.5 % errors, 95 % of requests under 1.5 s and 99 % under 3 s. If it misses, add instances (`numInstances`) or a bigger database, then repeat.
+5. **Also run the user journeys** (`site/tools/journeys.js`) against the same staging while it is under load: they show what a real shopper feels, not just the numbers.
+
 ## 5. Operating it
 
 - **Before a sale or campaign**: raise `numInstances` (or turn on Render autoscaling, a Pro-workspace feature) a day ahead; check database connections: `instances × WEB_CONCURRENCY × PG_POOL_MAX` must stay under the database limit (put pgbouncer in front if you need more — Render offers `connectionPool: pgbouncer`).
