@@ -1,6 +1,8 @@
 ﻿"""Turn one AI model photo + one AI flat-lay photo of a saree into the six gallery views used on its product page.
-   usage: python make_views.py <pid> <model.png> <flat.png> <out_dir>      e.g.  python make_views.py p23 raw/p23_model.png raw/p23_flat.png ../../assets/s
+   usage: python make_views.py <pid> <model.png|jpg> <flat.png|jpg> <out_dir>      e.g.  python make_views.py p13 raw/p13_model.png raw/p13_flat.png ../../assets/s
    views: 1 full length (3:4)  2 draped upper body (4:5)  3 folded/flat-lay (1:1)  4 border detail  5 pallu detail  6 weave and zari
+   Works with any source size (2560x1440 from ElevenLabs, 1536x864 from Figma): windows scale with the photo, and a crop is never
+   enlarged by more than 1.3x (it is lightly sharpened instead), so the views are as crisp as the source allows.
    The detail crops go to the most richly woven parts of the flat-lay (highest fine-detail energy), so they always show cloth and zari.
 """
 import sys, os
@@ -10,7 +12,7 @@ from PIL import Image, ImageFilter
 K = 4  # analysis scale
 
 def energy(im):
-    g = np.asarray(im.convert('L').resize((im.width // K, im.height // K), Image.BILINEAR), dtype=np.float32)
+    g = np.asarray(im.convert('L').resize((max(1, im.width // K), max(1, im.height // K)), Image.BILINEAR), dtype=np.float32)
     gx = np.abs(np.diff(g, axis=1, prepend=g[:, :1])); gy = np.abs(np.diff(g, axis=0, prepend=g[:1, :]))
     return gx + gy
 
@@ -22,14 +24,14 @@ def win_sum(ii, x, y, w, h):
 
 def best_window(e, ii, size, region=None, avoid=(), stride=12):
     """top-left (full-resolution) of the size x size window with the most fine detail inside `region` (x0,y0,x1,y1 in full-res), away from `avoid` boxes."""
-    s = size // K; H, W = e.shape; best, pos = -1, None
+    s = max(1, size // K); H, W = e.shape; best, pos = -1, None
     x0, y0, x1, y1 = [v // K for v in region] if region else (0, 0, W, H)
-    for y in range(max(0, y0), min(H - s, y1 - s) + 1, stride // 2 or 1):
-        for x in range(max(0, x0), min(W - s, x1 - s) + 1, stride // 2 or 1):
+    for y in range(max(0, y0), min(H - s, y1 - s) + 1, max(1, stride // 2)):
+        for x in range(max(0, x0), min(W - s, x1 - s) + 1, max(1, stride // 2)):
             if any(not (x + s <= ax0 // K or x >= ax1 // K or y + s <= ay0 // K or y >= ay1 // K) for ax0, ay0, ax1, ay1 in avoid): continue
             v = win_sum(ii, x, y, s, s)
             if v > best: best, pos = v, (x * K, y * K)
-    return pos
+    return pos or (0, 0)
 
 def model_window(m, width):
     """x-centre for the portrait crop: most detailed band, with a pull toward the middle (the model is asked to stand there)."""
@@ -39,7 +41,12 @@ def model_window(m, width):
     return (int(np.argmax(k * prior)) + w // 2) * K
 
 def save(im, box, size, path, q=78):
-    im.crop(box).resize(size, Image.LANCZOS).save(path, 'WEBP', quality=q, method=6)
+    c = im.crop(box); cw = c.width
+    scale = min(size[0] / cw, 1.3)                      # never enlarge a crop by more than 1.3x
+    out = (int(round(cw * scale)), int(round(c.height * scale)))
+    c = c.resize(out, Image.LANCZOS)
+    if scale > 1.05: c = c.filter(ImageFilter.UnsharpMask(radius=1.4, percent=70, threshold=2))
+    c.save(path, 'WEBP', quality=q, method=6)
 
 def main(pid, model_p, flat_p, out):
     os.makedirs(out, exist_ok=True)
@@ -51,14 +58,13 @@ def main(pid, model_p, flat_p, out):
     save(m, (x0, y0, x0 + dw, min(y0 + dh, H)), (800, 1000), f'{out}/{pid}-2.webp')
     s = f.height; fx = (f.width - s) // 2
     save(f, (fx, 0, fx + s, s), (900, 900), f'{out}/{pid}-3.webp')
-    e = energy(f); ii = integral(e); W, Hf = f.width, f.height; d = 640
+    e = energy(f); ii = integral(e); W, Hf = f.width, f.height; d = int(Hf * 0.444); dm = int(Hf * 0.333)
     p4 = best_window(e, ii, d, (0, int(Hf * .35), W, Hf))                                                # border: richest low-frame area
     p5 = best_window(e, ii, d, (int(W * .35), 0, W, Hf), avoid=[(p4[0], p4[1], p4[0] + d, p4[1] + d)])   # pallu: richest area elsewhere
-    p6 = best_window(e, ii, 480, None, avoid=[(p4[0], p4[1], p4[0] + d, p4[1] + d), (p5[0], p5[1], p5[0] + d, p5[1] + d)])  # weave macro
-    for i, (p, sz) in zip((4, 5, 6), ((p4, d), (p5, d), (p6, 480))):
+    p6 = best_window(e, ii, dm, None, avoid=[(p4[0], p4[1], p4[0] + d, p4[1] + d), (p5[0], p5[1], p5[0] + d, p5[1] + d)])  # weave macro
+    for i, (p, sz) in zip((4, 5, 6), ((p4, d), (p5, d), (p6, dm))):
         save(f, (p[0], p[1], p[0] + sz, p[1] + sz), (800, 800), f'{out}/{pid}-{i}.webp', q=78)
-    print(pid, 'ok  model x =', xc, ' details at', p4, p5, p6)
+    print(pid, 'ok  source', m.size, f.size, ' model x =', xc)
 
 if __name__ == '__main__':
     main(*sys.argv[1:5])
-

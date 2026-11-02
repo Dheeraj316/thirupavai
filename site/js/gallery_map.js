@@ -1,2 +1,2 @@
 // Written by tools/catalogue/build.js: how many of the six photos each saree has in assets/s/. A saree needs all six to be listed.
-export const SET = { p1: 6, p2: 6, p23: 6 };
+export const SET = { p1: 6, p2: 6, p3: 6, p4: 6, p5: 6, p6: 6, p7: 6, p8: 6, p9: 6, p10: 6, p11: 6, p12: 6, p13: 6, p14: 6, p15: 6, p16: 6, p17: 6, p18: 6, p19: 6, p20: 6, p21: 6, p22: 6, p23: 6, p24: 6, p25: 6, p26: 6, p27: 6, p28: 6, p29: 6, p30: 6, p31: 6, p32: 6, p33: 6, p34: 6, p35: 6, p36: 6 };
