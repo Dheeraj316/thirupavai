@@ -5,8 +5,10 @@ import { h, $, $$, ic, img, card, esc, money } from '../ui.js';
 import { glReady, motionReduced, set3D } from '../gate.js';
 const webglOK = () => { try { const c = document.createElement('canvas'); return !!(c.getContext('webgl2') || c.getContext('webgl')); } catch { return false; } };   // three.js (cloth.js) is imported only when the tunnel mounts
 
-const GAL = [['blue', 'royal-blue-zari-silk'], ['green', 'emerald-peacock-border'], ['border', 'maroon-banarasi-katan-silk'], ['magenta', 'magenta-heritage-silk'], ['pallu', 'wine-katan-gold-border'], ['weave', 'garnet-plain-silk']];
-const FAB = [['Kanchipuram silk', 'orange', '50% 22%', 'Temple borders, woven in Kanchi'], ['Banarasi silk', 'brocade', '50% 25%', 'Brocade, katan and gold zari'], ['Mysore silk', 'green', '50% 50%', 'Crepe silk with a quiet fall'], ['Organza', 'magenta', '30% 30%', 'Featherlight, edged in gold']];
+// every picture on the home page is one of the catalogue's own photographs (assets/s/pNN-k), so it reads as a single shoot
+const GAL = [['s/p4-3', 'royal-blue-zari-silk'], ['s/p5-3', 'emerald-peacock-border'], ['s/p1-3', 'maroon-banarasi-katan-silk'], ['s/p6-3', 'magenta-heritage-silk'], ['s/p9-3', 'wine-katan-gold-border'], ['s/p8-3', 'garnet-plain-silk']];
+const FAB = [['Kanchipuram silk', 's/p3-2', '50% 30%', 'Temple borders, woven in Kanchi'], ['Banarasi silk', 's/p1-2', '50% 30%', 'Brocade, katan and gold zari'], ['Mysore silk', 's/p5-2', '50% 30%', 'Crepe silk with a quiet fall'], ['Organza', 's/p10-2', '50% 30%', 'Featherlight, edged in gold'],
+  ['Chanderi cotton', 's/p23-2', '50% 30%', 'Sheer handloom, light as air'], ['Linen', 's/p27-2', '50% 30%', 'Textured, cool, easy to wear'], ['Tussar silk', 's/p31-2', '50% 30%', 'Hand-painted, naturally golden'], ['Georgette', 's/p36-2', '50% 30%', 'Fluid, embroidered, made for evenings']];
 const WORDS = 'Every saree can carry an authenticity passport: fibre, weave, weaver and Silk Mark / GI details — shown only where they are certified and supplied by the business.';
 const rm = motionReduced;
 

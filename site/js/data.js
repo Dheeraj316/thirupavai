@@ -6,7 +6,7 @@ export const FABRICS = ['Kanchipuram silk', 'Banarasi silk', 'Mysore silk', 'Org
 export const COLOURS = [['Maroon', '#6b1f35'], ['Red', '#b3262c'], ['Gold', '#c6a15b'], ['Emerald', '#1f6b4f'], ['Royal blue', '#2b3a8c'], ['Pink', '#d86c9a'], ['Ivory', '#efe3d0'], ['Black', '#222222'],
   ['Teal', '#1f6b6b'], ['Mustard', '#c9962b'], ['Sage', '#8fa88b'], ['Lavender', '#9d8bc4'], ['Peach', '#e8a68a'], ['Rust', '#a8481f'], ['Navy', '#1b2a4a'], ['Sky', '#8fb3d9'], ['Mint', '#a8d5c0'], ['Sand', '#d9c7a3'], ['Olive', '#6b7a3a'], ['Charcoal', '#3b3b3f']];
 export const OCCASIONS = ['Bridal', 'Festive', 'Everyday', 'Party', 'Office'];
-export const COLLECTIONS = [['bridal', 'Bridal Edit', 'red', '50% 30%'], ['festive', 'Festive Gold', 'orange', '50% 25%'], ['heritage', 'Silk Heritage', 'blue', '50% 40%'], ['everyday', 'Everyday Elegance', 'green', '50% 50%'], ['contemporary', 'Contemporary Drape', 'seated', '62% 50%']];
+export const COLLECTIONS = [['bridal', 'Bridal Edit', 's/p3-1', '50% 30%'], ['festive', 'Festive Gold', 's/p7-1', '50% 30%'], ['heritage', 'Silk Heritage', 's/p4-1', '50% 30%'], ['everyday', 'Everyday Elegance', 's/p17-1', '50% 30%'], ['contemporary', 'Contemporary Drape', 's/p28-1', '50% 30%']];
 
 const g = (a, b) => ({ img: a, label: b[0], pos: b[1], zoom: b[2] || 'cover' });
 const BASE = [
