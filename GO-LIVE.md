@@ -54,7 +54,10 @@ What "handles 10,000 at once" means here: the web servers keep **no state** (ses
 - [ ] **Load test from a separate machine** (k6 Cloud or any cloud VM — not a laptop): `k6 run -e BASE=https://thirupavai-staging.onrender.com -e VUS=10000 app/test/k6-login-storm.js`. For the duration of the test set `OTP_PER_IP`, `API_RATE_PER_MIN`, `OTP_DAILY_CAP`, `OTP_PER_MOBILE` to very large values on staging (the abuse guards would block one address) and restore them after. **Pass = under 0.5 % errors, p95 < 1.5 s, p99 < 3 s.** If it misses, add instances or move the database up a plan, and repeat.
 - [ ] Never run that test against production.
 
-### 4b. The 10,000-user load test — plan (not yet run)
+### 4b. The 10,000-user load test — plan (not yet run at full size)
+
+**Free-plan check already done (2026-11-03, `thirupavai-staging.onrender.com`, one free instance, default abuse limits):** 200 customers with 20 in flight — 200/200 signed in, 0 errors, slowest step 1.3 s; 100 customers all at once — 100/100 signed in, 0 errors, "request code" p99 3.2 s (3 s is the pass mark). This only shows the free instance is healthy and fast at small scale; it says nothing about 10,000 users, and the free web server sleeps when idle and has a fraction of a CPU. The full test below needs the paid copy.
+
 
 1. **Paid copy of staging, ready to deploy: `render.loadtest.yaml`** (3 web instances of `1c-2g`, Postgres `1c-2g`, key-value `1g`, abuse limits already raised, address `thirupavai-staging-load.onrender.com`). In Render: New → Blueprint → this repository → Blueprint file path `render.loadtest.yaml`. Render asks for a card for paid plans; you add it. Billing is per second. Render's pricing pages could not be read automatically, so check the monthly total shown on the Blueprint page before pressing Apply (the plan names are Render's own; third-party lists suggest roughly $100–150 a month for this size, i.e. a few dollars for a few hours). **Delete the Blueprint's services as soon as the test is done.**
 2. **The abuse limits are raised in that copy only** (`OTP_PER_IP`, `API_RATE_PER_MIN`, `OTP_DAILY_CAP`, `OTP_PER_MOBILE`). Never copy them to production.

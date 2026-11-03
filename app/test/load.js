@@ -7,6 +7,7 @@
 //   OTP_PER_IP=100000000 API_RATE_PER_MIN=100000000 OTP_DAILY_CAP=100000000 OTP_PER_MOBILE=100 node server.js
 // Pass/fail: error rate under 0.5% and p99 under 3 s for every step. Exit code 1 when a limit is missed.
 import http from 'node:http';
+import https from 'node:https';
 import { performance } from 'node:perf_hooks';
 
 const args = process.argv.slice(2);
@@ -22,11 +23,12 @@ const MAX_ERR = 0.005, MAX_P99 = 3000;
 
 // A machine has ~16,000 outgoing ports per source address. On loopback we spread customers over several source addresses (127.0.0.10, .11, ...), like many real users coming from many addresses.
 const LOOP = /^(127.|localhost$)/.test(BASE.hostname); const N_AG = LOOP ? 12 : 1;
-const agents = Array.from({ length: N_AG }, (_, k) => new http.Agent({ keepAlive: true, maxSockets: Math.ceil(CONC / N_AG) + 1, maxFreeSockets: Math.ceil(CONC / N_AG) + 1, ...(LOOP ? { localAddress: '127.0.0.' + (10 + k) } : {}) }));
+const TLS = BASE.protocol === 'https:'; const lib = TLS ? https : http;   // Render and any real host serve https; local servers are plain http
+const agents = Array.from({ length: N_AG }, (_, k) => new lib.Agent({ keepAlive: true, maxSockets: Math.ceil(CONC / N_AG) + 1, maxFreeSockets: Math.ceil(CONC / N_AG) + 1, ...(LOOP ? { localAddress: '127.0.0.' + (10 + k) } : {}) }));
 function call(method, path, body, cookie, ag = agents[0], base = BASE) {
   return new Promise((resolve) => {
     const t0 = performance.now(); const data = body ? JSON.stringify(body) : null;
-    const r = http.request({ host: base.hostname, port: base.port || 80, method, path, agent: ag, timeout: 30000, headers: { 'x-tp': '1', ...(data ? { 'content-type': 'application/json', 'content-length': Buffer.byteLength(data) } : {}), ...(cookie ? { cookie } : {}) } }, (res) => {
+    const r = lib.request({ host: base.hostname, port: base.port || (TLS ? 443 : 80), method, path, agent: ag, timeout: 30000, headers: { 'x-tp': '1', ...(data ? { 'content-type': 'application/json', 'content-length': Buffer.byteLength(data) } : {}), ...(cookie ? { cookie } : {}) } }, (res) => {
       const chunks = []; res.on('data', (c) => chunks.push(c)); res.on('end', () => {
         let json = null; try { json = JSON.parse(Buffer.concat(chunks).toString()); } catch { /* not JSON */ }
         resolve({ status: res.statusCode, ms: performance.now() - t0, json, cookie: (res.headers['set-cookie'] || []).map((c) => c.split(';')[0]).join('; ') });
